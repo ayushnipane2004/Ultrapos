@@ -2,6 +2,11 @@
 include 'db.php';
 
 $result = mysqli_query($conn, "SELECT * FROM users ORDER BY id DESC");
+
+
+
+
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -34,18 +39,47 @@ $result = mysqli_query($conn, "SELECT * FROM users ORDER BY id DESC");
       <?php include 'header.php' ?>
       <?php
         $result = mysqli_query($conn,"
-                SELECT
-                u.*,
-                r.role_name,
-                b.branch_name
-                FROM users u
-                LEFT JOIN role r
-                ON u.role_id=r.id
-                LEFT JOIN branch_master b
-                ON u.branch_id=b.id
-                ORDER BY u.id DESC
-            "); ?>
+            SELECT
+            u.*,
+            r.role_name,
+            b.branch_name
+            FROM users u
+            LEFT JOIN role r
+            ON u.role_id=r.id
+            LEFT JOIN branch_master b
+            ON u.branch_id=b.id
+            WHERE u.delete_flag='1'
+            AND u.company_id='$company_id'
+            ORDER BY u.id DESC
+            ");?>
 
+      <?php
+            
+            if(isset($_GET['delete_id']))
+{
+            $id = intval($_GET['delete_id']);
+
+            $delete = mysqli_query($conn,"
+                UPDATE users
+                SET
+                    delete_flag='0',
+                    modified_by='$user_id'
+                WHERE id='$id'
+                AND company_id='$company_id'
+            ");
+
+            if($delete)
+            {
+                echo "<script>
+                        alert('User Deleted Successfully');
+                        window.location='page-list-users.php';
+                    </script>";
+                exit;
+            }
+        }
+
+        ?>
+      
       
       
       
@@ -137,7 +171,7 @@ $result = mysqli_query($conn, "SELECT * FROM users ORDER BY id DESC");
                                         <div class="d-flex align-items-center list-action">
 
                                             <a class="badge badge-info mr-2"
-                                                href="view-branch.php?id=<?php echo $row['id']; ?>">
+                                                href="view-user.php?id=<?php echo $row['id']; ?>">
                                                 <i class="ri-eye-line mr-0"></i>
                                             </a>
 
@@ -148,12 +182,10 @@ $result = mysqli_query($conn, "SELECT * FROM users ORDER BY id DESC");
 
                                             </a>
 
-                                            <a class="badge bg-warning"
-                                            href="customer_delete.php?id=<?php echo $row['id']; ?>"
-                                            onclick="return confirm('Delete this customer?')">
-
-                                                <i class="ri-delete-bin-line"></i>
-
+                                            <a class="badge bg-warning mr-2"
+                                            href="?delete_id=<?php echo $row['id']; ?>"
+                                            onclick="return confirm('Delete this branch?')">
+                                                <i class="ri-delete-bin-line mr-0"></i>
                                             </a>
 
                                         </div>

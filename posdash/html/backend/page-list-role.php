@@ -163,8 +163,11 @@ while($row = mysqli_fetch_assoc($sql))
 
             <!-- Delete -->
             <a class="badge bg-warning mr-2"
+
                href="?delete_id=<?php echo $row['id']; ?>"
+
                onclick="return confirm('Are you sure you want to delete this role?')">
+               
                 <i class="ri-delete-bin-line mr-0"></i>
             </a>
 

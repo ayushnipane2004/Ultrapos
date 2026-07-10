@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 
@@ -26,6 +27,24 @@
 
     <?php include 'header.php' ?>
 
+
+<?php
+$id = $_GET['id'];
+
+$edit = mysqli_query($conn,"
+SELECT *
+FROM branch_master
+WHERE id='$id'
+AND company_id='$company_id'
+");
+
+$row = mysqli_fetch_assoc($edit);
+
+
+?>
+
+
+
     <?php
     $role = mysqli_query($conn,"
     SELECT id, role_name
@@ -40,7 +59,7 @@
         die(mysqli_error($conn));
     }
 
-    if(isset($_POST['save_branch']))
+    if(isset($_POST['update_branch']))
     {
         $branch_name            = mysqli_real_escape_string($conn,$_POST['branch_name']);
         $branch_code            = mysqli_real_escape_string($conn,$_POST['branch_code']);
@@ -63,16 +82,24 @@
         $contact_person_mobile  = mysqli_real_escape_string($conn,$_POST['contact_person_mobile']);
         $role_id                = mysqli_real_escape_string($conn,$_POST['role_id']);
         $opening_date           = mysqli_real_escape_string($conn,$_POST['opening_date']);
+
+
+        $currency = mysqli_real_escape_string($conn,$_POST['currency']);
+$financial_year = mysqli_real_escape_string($conn,$_POST['financial_year']);
+
+
         $timezone               = mysqli_real_escape_string($conn,$_POST['timezone']);
+
         $description            = mysqli_real_escape_string($conn,$_POST['description']);
         $status                 = mysqli_real_escape_string($conn,$_POST['status']);
 
         $check = mysqli_query($conn,"
         SELECT id
         FROM branch_master
-        WHERE company_id='$company_id'
-        AND branch_email='$branch_email'
-        AND delete_flag='1'
+       WHERE company_id='$company_id'
+AND branch_email='$branch_email'
+AND id!='$id'
+AND delete_flag='1'
         ");
 
         if(mysqli_num_rows($check)>0)
@@ -98,60 +125,34 @@ Swal.fire({
         else
         {
             mysqli_query($conn,"
-            INSERT INTO branch_master
-            (
-                company_id,
-                branch_name,
-                branch_code,
-                branch_type,
-                business_type,
-                gst_no,
-                branch_email,
-                branch_mobile,
-                address,
-                area,
-                city,
-                district,
-                state,
-                country,
-                pincode,
-                contact_person_name,
-                contact_person_email,
-                contact_person_mobile,
-                role_id,
-                opening_date,
-                description,
-                status,
-                created_by,
-                modified_by
-            )
-            VALUES
-            (
-                '$company_id',
-                '$branch_name',
-                '$branch_code',
-                '$branch_type',
-                '$business_type',
-                '$gst_no',
-                '$branch_email',
-                '$branch_mobile',
-                '$address',
-                '$area',
-                '$city',
-                '$district',
-                '$state',
-                '$country',
-                '$pincode',
-                '$contact_person_name',
-                '$contact_person_email',
-                '$contact_person_mobile',
-                '$role_id',
-                '$opening_date',
-                '$description',
-                '$status',
-                '$created_by',
-                '$modified_by'
-            )
+            UPDATE branch_master
+SET
+branch_name='$branch_name',
+branch_code='$branch_code',
+branch_type='$branch_type',
+business_type='$business_type',
+gst_no='$gst_no',
+branch_email='$branch_email',
+branch_mobile='$branch_mobile',
+address='$address',
+area='$area',
+city='$city',
+district='$district',
+state='$state',
+country='$country',
+pincode='$pincode',
+currency='$currency',
+financial_year='$financial_year',
+contact_person_name='$contact_person_name',
+contact_person_email='$contact_person_email',
+contact_person_mobile='$contact_person_mobile',
+role_id='$role_id',
+opening_date='$opening_date',
+description='$description',
+status='$status',
+modified_by='$modified_by'
+WHERE id='$id'
+AND company_id='$company_id'
             ");
 
               echo "
@@ -161,7 +162,7 @@ Swal.fire({
 Swal.fire({
     icon: 'success',
     title: 'Success!',
-    text: 'Branch Register Successfully',
+    text: 'Branch update Successfully',
     confirmButtonColor: '#32bdea',
     confirmButtonText: 'OK'
 }).then((result) => {
@@ -180,8 +181,8 @@ Swal.fire({
             <div class="container-fluid">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between">
-
- <div class="header-title">
+                     
+                         <div class="header-title">
                           <a href="page-list-branch.php"
 class="btn btn-secondary mr-2">
 
@@ -192,11 +193,14 @@ Back
 </a>
                         </div>
 
-
-
-                        <div class="header-title">
-                            <h4 class="card-title">Add Branch</h4>
+   <div class="header-title">
+                            <h4 class="card-title">Update Branch</h4>
                         </div>
+
+
+
+
+
                     </div>
                 </div>
 
@@ -254,7 +258,7 @@ Back
                                                            placeholder="Enter Branch Name" 
                                                            pattern="[A-Za-z0-9\s]{2,100}" 
                                                            title="2-100 characters, letters, numbers, spaces"
-                                                           value="<?php echo isset($_POST['branch_name']) ? htmlspecialchars($_POST['branch_name']) : ''; ?>" required>
+                                                           value="<?php echo isset($_POST['branch_name']) ? htmlspecialchars($_POST['branch_name']) : htmlspecialchars($row['branch_name']); ?>" required>
                                                     <div class="invalid-feedback">Branch name is required (2-100 chars, letters, numbers, spaces).</div>
                                                 </div>
                                             </div>
@@ -265,7 +269,7 @@ Back
                                                            placeholder="Branch Code" 
                                                            pattern="[A-Za-z0-9]{1,20}" 
                                                            title="Letters and numbers only, max 20 characters"
-                                                           value="<?php echo isset($_POST['branch_code']) ? htmlspecialchars($_POST['branch_code']) : ''; ?>" required>
+                                                           value="<?php echo isset($_POST['branch_code']) ? htmlspecialchars($_POST['branch_code']) : htmlspecialchars($row['branch_code']); ?>" required>
                                                     <div class="invalid-feedback">Branch code must contain only letters and numbers.</div>
                                                 </div>
                                             </div>
@@ -276,27 +280,62 @@ Back
                                                            placeholder="Enter GST Number" 
                                                            pattern="^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$"
                                                            title="Enter valid Indian GST number"
-                                                           value="<?php echo isset($_POST['gst_no']) ? htmlspecialchars($_POST['gst_no']) : ''; ?>" required>
+                                                           value="<?php echo isset($_POST['gst_no']) ? htmlspecialchars($_POST['gst_no']) : htmlspecialchars($row['gst_no']); ?>" required>
                                                     <div class="invalid-feedback">Please enter a valid Indian GST number.</div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label>Branch Type <span class="text-danger">*</span></label>
-                                                    <select name="branch_type" class="form-control" required>
-                                                        <option value="">Select Branch Type</option>
-                                                        <option value="head office" <?php if(isset($_POST['branch_type']) && $_POST['branch_type'] == 'head office') echo 'selected'; ?>>Head Office</option>
-                                                        <option value="branch" <?php if(isset($_POST['branch_type']) && $_POST['branch_type'] == 'branch') echo 'selected'; ?>>Branch</option>
-                                                    </select>
-                                                    <div class="invalid-feedback">Please select branch type.</div>
-                                                </div>
-                                            </div>
+
+
+
+<div class="col-md-6">
+    <div class="form-group">
+        <label>Branch Type <span class="text-danger">*</span></label>
+
+        <select name="branch_type" class="form-control" required>
+
+            <option value="">Select Branch Type</option>
+
+            <option value="head office"
+                <?php
+                if(
+                    (isset($_POST['branch_type']) && $_POST['branch_type'] == 'head office')
+                    ||
+                    (!isset($_POST['branch_type']) && $row['branch_type'] == 'head office')
+                ){
+                    echo "selected";
+                }
+                ?>>
+                Head Office
+            </option>
+
+            <option value="branch"
+                <?php
+                if(
+                    (isset($_POST['branch_type']) && $_POST['branch_type'] == 'branch')
+                    ||
+                    (!isset($_POST['branch_type']) && $row['branch_type'] == 'branch')
+                ){
+                    echo "selected";
+                }
+                ?>>
+                Branch
+            </option>
+
+        </select>
+
+        <div class="invalid-feedback">
+            Please select branch type.
+        </div>
+    </div>
+</div>
+
+
                                             <div class="col-md-6">
                                                 <div class="form-group">
                                                     <label>Branch Email <span class="text-danger">*</span></label>
                                                     <input type="email" class="form-control" name="branch_email" 
                                                            placeholder="Enter Email" 
-                                                           value="<?php echo isset($_POST['branch_email']) ? htmlspecialchars($_POST['branch_email']) : ''; ?>" required>
+                                                           value="<?php echo isset($_POST['branch_email']) ? htmlspecialchars($_POST['branch_email']) : htmlspecialchars($row['branch_email']); ?>" required>
                                                     <div class="invalid-feedback">Please enter a valid email address.</div>
                                                 </div>
                                             </div>
@@ -307,7 +346,7 @@ Back
                                                            placeholder="Enter Mobile Number" 
                                                            pattern="[0-9]{10}" maxlength="10"
                                                            title="Exactly 10 digits"
-                                                           value="<?php echo isset($_POST['branch_mobile']) ? htmlspecialchars($_POST['branch_mobile']) : ''; ?>" required>
+                                                           value="<?php echo isset($_POST['branch_mobile']) ? htmlspecialchars($_POST['branch_mobile']) : htmlspecialchars($row['branch_mobile']); ?>" required>
                                                     <div class="invalid-feedback">Mobile number must be exactly 10 digits.</div>
                                                 </div>
                                             </div>
@@ -325,55 +364,55 @@ Back
 
             <option value="">Select Business Type</option>
 
-            <option value="Retail Store"
-                <?php if(isset($_POST['businesstype']) && $_POST['businesstype']=="Retail Store") echo "selected"; ?>>
-                Retail Store
-            </option>
+       <option value="Retail Store"
+<?php if((isset($_POST['business_type']) && $_POST['business_type']=="Retail Store") || (!isset($_POST['business_type']) && $row['business_type']=="Retail Store")) echo "selected"; ?>>
+Retail Store
+</option>
 
-            <option value="Wholesale"
-                <?php if(isset($_POST['businesstype']) && $_POST['businesstype']=="Wholesale") echo "selected"; ?>>
-                Wholesale
-            </option>
+<option value="Wholesale"
+<?php if((isset($_POST['business_type']) && $_POST['business_type']=="Wholesale") || (!isset($_POST['business_type']) && $row['business_type']=="Wholesale")) echo "selected"; ?>>
+Wholesale
+</option>
 
-            <option value="Supermarket"
-                <?php if(isset($_POST['businesstype']) && $_POST['businesstype']=="Supermarket") echo "selected"; ?>>
-                Supermarket
-            </option>
+<option value="Supermarket"
+<?php if((isset($_POST['business_type']) && $_POST['business_type']=="Supermarket") || (!isset($_POST['business_type']) && $row['business_type']=="Supermarket")) echo "selected"; ?>>
+Supermarket
+</option>
 
-            <option value="Restaurant"
-                <?php if(isset($_POST['businesstype']) && $_POST['businesstype']=="Restaurant") echo "selected"; ?>>
-                Restaurant
-            </option>
+<option value="Restaurant"
+<?php if((isset($_POST['business_type']) && $_POST['business_type']=="Restaurant") || (!isset($_POST['business_type']) && $row['business_type']=="Restaurant")) echo "selected"; ?>>
+Restaurant
+</option>
 
-            <option value="Cafe"
-                <?php if(isset($_POST['businesstype']) && $_POST['businesstype']=="Cafe") echo "selected"; ?>>
-                Cafe
-            </option>
+<option value="Cafe"
+<?php if((isset($_POST['business_type']) && $_POST['business_type']=="Cafe") || (!isset($_POST['business_type']) && $row['business_type']=="Cafe")) echo "selected"; ?>>
+Cafe
+</option>
 
-            <option value="Medical Store"
-                <?php if(isset($_POST['businesstype']) && $_POST['businesstype']=="Medical Store") echo "selected"; ?>>
-                Medical Store
-            </option>
+<option value="Medical Store"
+<?php if((isset($_POST['business_type']) && $_POST['business_type']=="Medical Store") || (!isset($_POST['business_type']) && $row['business_type']=="Medical Store")) echo "selected"; ?>>
+Medical Store
+</option>
 
-            <option value="Electronics"
-                <?php if(isset($_POST['businesstype']) && $_POST['businesstype']=="Electronics") echo "selected"; ?>>
-                Electronics
-            </option>
+<option value="Electronics"
+<?php if((isset($_POST['business_type']) && $_POST['business_type']=="Electronics") || (!isset($_POST['business_type']) && $row['business_type']=="Electronics")) echo "selected"; ?>>
+Electronics
+</option>
 
-            <option value="Clothing & Fashion"
-                <?php if(isset($_POST['businesstype']) && $_POST['businesstype']=="Clothing & Fashion") echo "selected"; ?>>
-                Clothing & Fashion
-            </option>
+<option value="Clothing & Fashion"
+<?php if((isset($_POST['business_type']) && $_POST['business_type']=="Clothing & Fashion") || (!isset($_POST['business_type']) && $row['business_type']=="Clothing & Fashion")) echo "selected"; ?>>
+Clothing & Fashion
+</option>
 
-            <option value="Hardware"
-                <?php if(isset($_POST['businesstype']) && $_POST['businesstype']=="Hardware") echo "selected"; ?>>
-                Hardware
-            </option>
+<option value="Hardware"
+<?php if((isset($_POST['business_type']) && $_POST['business_type']=="Hardware") || (!isset($_POST['business_type']) && $row['business_type']=="Hardware")) echo "selected"; ?>>
+Hardware
+</option>
 
-            <option value="Distributor"
-                <?php if(isset($_POST['businesstype']) && $_POST['businesstype']=="Distributor") echo "selected"; ?>>
-                Distributor
-            </option>
+<option value="Distributor"
+<?php if((isset($_POST['business_type']) && $_POST['business_type']=="Distributor") || (!isset($_POST['business_type']) && $row['business_type']=="Distributor")) echo "selected"; ?>>
+Distributor
+</option>
 
         </select>
 
@@ -396,9 +435,15 @@ Back
                                                 <div class="form-group">
                                                     <label>Status <span class="text-danger">*</span></label>
                                                     <select class="form-control" name="status" required>
-                                                        <option value="Active" <?php if(isset($_POST['status']) && $_POST['status'] == 'Active') echo 'selected'; ?>>Active</option>
-                                                        <option value="Inactive" <?php if(isset($_POST['status']) && $_POST['status'] == 'Inactive') echo 'selected'; ?>>Inactive</option>
-                                                    </select>
+                                                       <option value="Active"
+<?php if((isset($_POST['status']) && $_POST['status']=="Active") || (!isset($_POST['status']) && $row['status']=="Active")) echo "selected"; ?>>
+Active
+</option>
+
+<option value="Inactive"
+<?php if((isset($_POST['status']) && $_POST['status']=="Inactive") || (!isset($_POST['status']) && $row['status']=="Inactive")) echo "selected"; ?>>
+Inactive
+</option>  </select>
                                                     <div class="invalid-feedback">Please select status.</div>
                                                 </div>
                                             </div>
@@ -424,7 +469,7 @@ Back
                                                     <label>Address <span class="text-danger">*</span></label>
                                                     <textarea class="form-control" rows="3" name="address" 
                                                               placeholder="Enter Full Address" 
-                                                              maxlength="255" required><?php echo isset($_POST['address']) ? htmlspecialchars($_POST['address']) : ''; ?></textarea>
+                                                              maxlength="255" required><?php echo isset($_POST['address']) ? htmlspecialchars($_POST['address']) : htmlspecialchars($row['address']); ?></textarea>
                                                     <div class="invalid-feedback">Address is required (max 255 characters).</div>
                                                 </div>
                                             </div>
@@ -434,7 +479,7 @@ Back
                                                     <input type="text" class="form-control" name="city" 
                                                            placeholder="Enter City"
                                                            pattern="[A-Za-z\s]+" title="Only alphabets and spaces allowed"
-                                                           value="<?php echo isset($_POST['city']) ? htmlspecialchars($_POST['city']) : ''; ?>" required>
+                                                           value="<?php echo isset($_POST['city']) ? htmlspecialchars($_POST['city']) : htmlspecialchars($row['city']); ?>" required>
                                                     <div class="invalid-feedback">City must contain only alphabets and spaces.</div>
                                                 </div>
                                             </div>
@@ -444,7 +489,7 @@ Back
                                                     <input type="text" class="form-control" name="district" 
                                                            placeholder="Enter District"
                                                            pattern="[A-Za-z\s]+" title="Only alphabets and spaces allowed"
-                                                           value="<?php echo isset($_POST['district']) ? htmlspecialchars($_POST['district']) : ''; ?>" required>
+                                                           value="<?php echo isset($_POST['district']) ? htmlspecialchars($_POST['district']) : htmlspecialchars($row['district']); ?>" required>
                                                     <div class="invalid-feedback">District must contain only alphabets and spaces.</div>
                                                 </div>
                                             </div>
@@ -454,7 +499,7 @@ Back
                                                     <input type="text" class="form-control" name="state" 
                                                            placeholder="Enter State"
                                                            pattern="[A-Za-z\s]+" title="Only alphabets and spaces allowed"
-                                                           value="<?php echo isset($_POST['state']) ? htmlspecialchars($_POST['state']) : ''; ?>" required>
+                                                           value="<?php echo isset($_POST['state']) ? htmlspecialchars($_POST['state']) : htmlspecialchars($row['state']); ?>" required>
                                                     <div class="invalid-feedback">State must contain only alphabets and spaces.</div>
                                                 </div>
                                             </div>
@@ -464,7 +509,7 @@ Back
                                                     <input type="text" class="form-control" name="country" 
                                                            placeholder="Enter Country"
                                                            pattern="[A-Za-z\s]+" title="Only alphabets and spaces allowed"
-                                                           value="<?php echo isset($_POST['country']) ? htmlspecialchars($_POST['country']) : ''; ?>" required>
+                                                           value="<?php echo isset($_POST['country']) ? htmlspecialchars($_POST['country']) : htmlspecialchars($row['country']); ?>" required>
                                                     <div class="invalid-feedback">Country must contain only alphabets and spaces.</div>
                                                 </div>
                                             </div>
@@ -474,7 +519,7 @@ Back
                                                     <input type="text" class="form-control" name="area" 
                                                            placeholder="Enter Area"
                                                            pattern="[A-Za-z0-9\s]+" title="Letters, numbers and spaces allowed"
-                                                           value="<?php echo isset($_POST['area']) ? htmlspecialchars($_POST['area']) : ''; ?>" required>
+                                                           value="<?php echo isset($_POST['area']) ? htmlspecialchars($_POST['area']) : htmlspecialchars($row['area']); ?>" required>
                                                     <div class="invalid-feedback">Area must contain only letters, numbers and spaces.</div>
                                                 </div>
                                             </div>
@@ -484,7 +529,7 @@ Back
                                                     <input type="text" class="form-control" name="pincode" 
                                                            placeholder="Enter Pincode"
                                                            pattern="[0-9]{6}" maxlength="6" title="Exactly 6 digits"
-                                                           value="<?php echo isset($_POST['pincode']) ? htmlspecialchars($_POST['pincode']) : ''; ?>" required>
+                                                           value="<?php echo isset($_POST['pincode']) ? htmlspecialchars($_POST['pincode']) : htmlspecialchars($row['pincode']); ?>" required>
                                                     <div class="invalid-feedback">Pincode must be exactly 6 digits.</div>
                                                 </div>
                                             </div>
@@ -499,56 +544,55 @@ Back
 
             <option value="">Select Currency</option>
 
-            <option value="INR"
-                <?php if(isset($_POST['currency']) && $_POST['currency']=="INR") echo "selected"; ?>>
-                INR - Indian Rupee
-            </option>
+         <option value="INR"
+<?php if((isset($_POST['currency']) && $_POST['currency']=="INR") || (!isset($_POST['currency']) && $row['currency']=="INR")) echo "selected"; ?>>
+INR - Indian Rupee
+</option>
 
-            <option value="USD"
-                <?php if(isset($_POST['currency']) && $_POST['currency']=="USD") echo "selected"; ?>>
-                USD - US Dollar
-            </option>
+<option value="USD"
+<?php if((isset($_POST['currency']) && $_POST['currency']=="USD") || (!isset($_POST['currency']) && $row['currency']=="USD")) echo "selected"; ?>>
+USD - US Dollar
+</option>
 
-            <option value="EUR"
-                <?php if(isset($_POST['currency']) && $_POST['currency']=="EUR") echo "selected"; ?>>
-                EUR - Euro
-            </option>
+<option value="EUR"
+<?php if((isset($_POST['currency']) && $_POST['currency']=="EUR") || (!isset($_POST['currency']) && $row['currency']=="EUR")) echo "selected"; ?>>
+EUR - Euro
+</option>
 
-            <option value="GBP"
-                <?php if(isset($_POST['currency']) && $_POST['currency']=="GBP") echo "selected"; ?>>
-                GBP - British Pound
-            </option>
+<option value="GBP"
+<?php if((isset($_POST['currency']) && $_POST['currency']=="GBP") || (!isset($_POST['currency']) && $row['currency']=="GBP")) echo "selected"; ?>>
+GBP - British Pound
+</option>
 
-            <option value="AED"
-                <?php if(isset($_POST['currency']) && $_POST['currency']=="AED") echo "selected"; ?>>
-                AED - UAE Dirham
-            </option>
+<option value="AED"
+<?php if((isset($_POST['currency']) && $_POST['currency']=="AED") || (!isset($_POST['currency']) && $row['currency']=="AED")) echo "selected"; ?>>
+AED - UAE Dirham
+</option>
 
-            <option value="SAR"
-                <?php if(isset($_POST['currency']) && $_POST['currency']=="SAR") echo "selected"; ?>>
-                SAR - Saudi Riyal
-            </option>
+<option value="SAR"
+<?php if((isset($_POST['currency']) && $_POST['currency']=="SAR") || (!isset($_POST['currency']) && $row['currency']=="SAR")) echo "selected"; ?>>
+SAR - Saudi Riyal
+</option>
 
-            <option value="JPY"
-                <?php if(isset($_POST['currency']) && $_POST['currency']=="JPY") echo "selected"; ?>>
-                JPY - Japanese Yen
-            </option>
+<option value="JPY"
+<?php if((isset($_POST['currency']) && $_POST['currency']=="JPY") || (!isset($_POST['currency']) && $row['currency']=="JPY")) echo "selected"; ?>>
+JPY - Japanese Yen
+</option>
 
-            <option value="AUD"
-                <?php if(isset($_POST['currency']) && $_POST['currency']=="AUD") echo "selected"; ?>>
-                AUD - Australian Dollar
-            </option>
+<option value="AUD"
+<?php if((isset($_POST['currency']) && $_POST['currency']=="AUD") || (!isset($_POST['currency']) && $row['currency']=="AUD")) echo "selected"; ?>>
+AUD - Australian Dollar
+</option>
 
-            <option value="CAD"
-                <?php if(isset($_POST['currency']) && $_POST['currency']=="CAD") echo "selected"; ?>>
-                CAD - Canadian Dollar
-            </option>
+<option value="CAD"
+<?php if((isset($_POST['currency']) && $_POST['currency']=="CAD") || (!isset($_POST['currency']) && $row['currency']=="CAD")) echo "selected"; ?>>
+CAD - Canadian Dollar
+</option>
 
-            <option value="SGD"
-                <?php if(isset($_POST['currency']) && $_POST['currency']=="SGD") echo "selected"; ?>>
-                SGD - Singapore Dollar
-            </option>
-
+<option value="SGD"
+<?php if((isset($_POST['currency']) && $_POST['currency']=="SGD") || (!isset($_POST['currency']) && $row['currency']=="SGD")) echo "selected"; ?>>
+SGD - Singapore Dollar
+</option>
         </select>
 
         <div class="invalid-feedback">
@@ -569,40 +613,40 @@ Back
 
             <option value="">Select Financial Year</option>
 
-            <option value="2023-2024"
-                <?php if(isset($_POST['financial_year']) && $_POST['financial_year']=="2023-2024") echo "selected"; ?>>
-                2023-2024
-            </option>
+          <option value="2023-2024"
+<?php if((isset($_POST['financial_year']) && $_POST['financial_year']=="2023-2024") || (!isset($_POST['financial_year']) && $row['financial_year']=="2023-2024")) echo "selected"; ?>>
+2023-2024
+</option>
 
-            <option value="2024-2025"
-                <?php if(isset($_POST['financial_year']) && $_POST['financial_year']=="2024-2025") echo "selected"; ?>>
-                2024-2025
-            </option>
+<option value="2024-2025"
+<?php if((isset($_POST['financial_year']) && $_POST['financial_year']=="2024-2025") || (!isset($_POST['financial_year']) && $row['financial_year']=="2024-2025")) echo "selected"; ?>>
+2024-2025
+</option>
 
-            <option value="2025-2026"
-                <?php if(isset($_POST['financial_year']) && $_POST['financial_year']=="2025-2026") echo "selected"; ?>>
-                2025-2026
-            </option>
+<option value="2025-2026"
+<?php if((isset($_POST['financial_year']) && $_POST['financial_year']=="2025-2026") || (!isset($_POST['financial_year']) && $row['financial_year']=="2025-2026")) echo "selected"; ?>>
+2025-2026
+</option>
 
-            <option value="2026-2027"
-                <?php if(isset($_POST['financial_year']) && $_POST['financial_year']=="2026-2027") echo "selected"; ?>>
-                2026-2027
-            </option>
+<option value="2026-2027"
+<?php if((isset($_POST['financial_year']) && $_POST['financial_year']=="2026-2027") || (!isset($_POST['financial_year']) && $row['financial_year']=="2026-2027")) echo "selected"; ?>>
+2026-2027
+</option>
 
-            <option value="2027-2028"
-                <?php if(isset($_POST['financial_year']) && $_POST['financial_year']=="2027-2028") echo "selected"; ?>>
-                2027-2028
-            </option>
+<option value="2027-2028"
+<?php if((isset($_POST['financial_year']) && $_POST['financial_year']=="2027-2028") || (!isset($_POST['financial_year']) && $row['financial_year']=="2027-2028")) echo "selected"; ?>>
+2027-2028
+</option>
 
-            <option value="2028-2029"
-                <?php if(isset($_POST['financial_year']) && $_POST['financial_year']=="2028-2029") echo "selected"; ?>>
-                2028-2029
-            </option>
+<option value="2028-2029"
+<?php if((isset($_POST['financial_year']) && $_POST['financial_year']=="2028-2029") || (!isset($_POST['financial_year']) && $row['financial_year']=="2028-2029")) echo "selected"; ?>>
+2028-2029
+</option>
 
-            <option value="2029-2030"
-                <?php if(isset($_POST['financial_year']) && $_POST['financial_year']=="2029-2030") echo "selected"; ?>>
-                2029-2030
-            </option>
+<option value="2029-2030"
+<?php if((isset($_POST['financial_year']) && $_POST['financial_year']=="2029-2030") || (!isset($_POST['financial_year']) && $row['financial_year']=="2029-2030")) echo "selected"; ?>>
+2029-2030
+</option>
 
         </select>
 
@@ -639,7 +683,7 @@ Back
                                                     <input type="text" class="form-control" name="contact_person_name" 
                                                            placeholder="Enter Person Name"
                                                            pattern="[A-Za-z\s]+" title="Only alphabets and spaces allowed"
-                                                           value="<?php echo isset($_POST['contact_person_name']) ? htmlspecialchars($_POST['contact_person_name']) : ''; ?>" required>
+                                                           value="<?php echo isset($_POST['contact_person_name']) ? htmlspecialchars($_POST['contact_person_name']) : htmlspecialchars($row['contact_person_name']); ?>" required>
                                                     <div class="invalid-feedback">Contact person name must contain only alphabets and spaces.</div>
                                                 </div>
                                             </div>
@@ -648,7 +692,7 @@ Back
                                                     <label>Contact Person Email <span class="text-danger">*</span></label>
                                                     <input type="email" class="form-control" name="contact_person_email" 
                                                            placeholder="Email"
-                                                           value="<?php echo isset($_POST['contact_person_email']) ? htmlspecialchars($_POST['contact_person_email']) : ''; ?>" required>
+                                                           value="<?php echo isset($_POST['contact_person_email']) ? htmlspecialchars($_POST['contact_person_email']) : htmlspecialchars($row['contact_person_email']); ?>" required>
                                                     <div class="invalid-feedback">Please enter a valid email address.</div>
                                                 </div>
                                             </div>
@@ -658,26 +702,60 @@ Back
                                                     <input type="text" class="form-control" name="contact_person_mobile" 
                                                            placeholder="Enter Phone"
                                                            pattern="[0-9]{10}" maxlength="10" title="Exactly 10 digits"
-                                                           value="<?php echo isset($_POST['contact_person_mobile']) ? htmlspecialchars($_POST['contact_person_mobile']) : ''; ?>" required>
+                                                           value="<?php echo isset($_POST['contact_person_mobile']) ? htmlspecialchars($_POST['contact_person_mobile']) : htmlspecialchars($row['contact_person_mobile']); ?>" required>
                                                     <div class="invalid-feedback">Phone number must be exactly 10 digits.</div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label>Role <span class="text-danger">*</span></label>
-                                                    <select class="form-control" name="role_id" required>
-                                                        <option value="">Select Role</option>
-                                                        <?php 
-                                                        mysqli_data_seek($role, 0);
-                                                        while($row = mysqli_fetch_assoc($role)) { ?>
-                                                            <option value="<?= $row['id']; ?>" <?php if(isset($_POST['role_id']) && $_POST['role_id'] == $row['id']) echo 'selected'; ?>>
-                                                                <?= $row['role_name']; ?>
-                                                            </option>
-                                                        <?php } ?>
-                                                    </select>
-                                                    <div class="invalid-feedback">Please select a role.</div>
-                                                </div>
-                                            </div>
+
+
+<div class="col-md-6">
+    <div class="form-group">
+        <label>Role <span class="text-danger">*</span></label>
+
+        <select class="form-control" name="role_id" required>
+
+            <option value="">Select Role</option>
+
+            <?php
+            mysqli_data_seek($role, 0);
+
+            while($roleRow = mysqli_fetch_assoc($role))
+            {
+            ?>
+
+            <option value="<?php echo $roleRow['id']; ?>"
+            <?php
+            if(
+                (isset($_POST['role_id']) && $_POST['role_id'] == $roleRow['id'])
+                ||
+                (!isset($_POST['role_id']) && $row['role_id'] == $roleRow['id'])
+            )
+            {
+                echo "selected";
+            }
+            ?>>
+
+                <?php echo $roleRow['role_name']; ?>
+
+            </option>
+
+            <?php
+            }
+            ?>
+
+        </select>
+
+        <div class="invalid-feedback">
+            Please select a role.
+        </div>
+
+    </div>
+</div>
+
+
+
+
+
                                         </div>
                                     </div>
                                 </div>
@@ -691,24 +769,44 @@ Back
                                     </div>
                                     <div class="card-body">
                                         <div class="row">
+
+
                                             <div class="col-md-3">
                                                 <div class="form-group">
                                                     <label>Opening Date</label>
                                                     <input type="date" class="form-control" name="opening_date" 
                                                            max="<?php echo date('Y-m-d'); ?>"
-                                                           value="<?php echo isset($_POST['opening_date']) ? $_POST['opening_date'] : ''; ?>">
+                                                           value="<?php echo isset($_POST['opening_date']) ? $_POST['opening_date'] : htmlspecialchars($row['opening_date']); ?>">
                                                     <div class="invalid-feedback">Opening date cannot be a future date.</div>
                                                 </div>
                                             </div>
-                                            <div class="col-md-12">
-                                                <div class="form-group">
-                                                    <label>Description <span class="text-danger">*</span></label>
-                                                    <textarea class="form-control" rows="3" name="description" 
-                                                              placeholder="Description" 
-                                                              maxlength="500" required><?php echo isset($_POST['description']) ? htmlspecialchars($_POST['description']) : ''; ?></textarea>
-                                                    <div class="invalid-feedback">Description is required (max 500 characters).</div>
-                                                </div>
-                                            </div>
+
+
+
+                                          <div class="col-md-12">
+    <div class="form-group">
+        <label>Description</label>
+
+        <textarea class="form-control"
+                  rows="3"
+                  name="description"
+                  placeholder="Description"
+                  maxlength="500"
+                  required><?php
+echo isset($_POST['description'])
+    ? htmlspecialchars($_POST['description'])
+    : htmlspecialchars($row['description']);
+?></textarea>
+
+        <div class="invalid-feedback">
+            Description is required (max 500 characters).
+        </div>
+
+    </div>
+</div>
+
+
+
                                         </div>
                                     </div>
                                 </div>
@@ -716,8 +814,8 @@ Back
                                 <!-- Submit Buttons (inside final step) -->
                                 <div class="card mt-3">
                                     <div class="card-body text-center">
-                                        <button type="submit" name="save_branch" class="btn btn-primary mr-2">
-                                            <i class="ri-save-line"></i> Add Branch
+                                        <button type="submit" name="update_branch" class="btn btn-primary mr-2">
+                                            <i class="ri-save-line"></i> Update Branch
                                         </button>
                                         <button type="reset" class="btn btn-danger">
                                             <i class="ri-refresh-line"></i> Reset

@@ -3,6 +3,31 @@ include 'db.php';
 
 $result = mysqli_query($conn, "SELECT * FROM supplier ORDER BY id DESC");
 ?>
+<?php
+include 'db.php';
+
+/* ---------------- DELETE COMPANY ---------------- */
+
+if(isset($_GET['delete_id']))
+{
+    $id = intval($_GET['delete_id']);
+
+    $delete = mysqli_query($conn,"
+        UPDATE supplier
+        SET delete_flag='0'
+        WHERE id='$id'
+    ");
+
+    if($delete)
+    {
+        echo "<script>
+            alert('Company Deleted Successfully');
+            window.location='page-list-suppliers.php';
+        </script>";
+        exit;
+    }
+}
+?>
 <!doctype html>
 <html lang="en">
   
@@ -119,24 +144,26 @@ $result = mysqli_query($conn, "SELECT * FROM supplier ORDER BY id DESC");
                                         <div class="d-flex align-items-center list-action">
 
                                             <a class="badge badge-info mr-2"
-                                                href="view-suppliers.php?id=<?php echo $row['id']; ?>">
+                                                href="pratik.php?id=<?php echo $row['id']; ?>">
                                                 <i class="ri-eye-line mr-0"></i>
                                             </a>
 
                                             <a class="badge bg-success mr-2"
-                                            href="customer_edit.php?id=<?php echo $row['id']; ?>">
+                                            href="view-suppliers.php?id=<?php echo $row['id']; ?>">
 
                                                 <i class="ri-pencil-line"></i>
 
                                             </a>
 
-                                            <a class="badge bg-warning"
-                                            href="customer_delete.php?id=<?php echo $row['id']; ?>"
-                                            onclick="return confirm('Delete this customer?')">
+                                            <a class="badge badge-danger"
+                                                href="?delete_id=<?php echo $row['id']; ?>"
+                                                onclick="return confirm('Delete this supplier?');">
 
                                                 <i class="ri-delete-bin-line"></i>
 
-                                            </a>
+                                                </a>
+
+                                                  
 
                                         </div>
 

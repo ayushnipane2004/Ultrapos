@@ -1,11 +1,40 @@
 <?php include 'session.php' ?>
 <?php include 'permission.php' ?>
 
+<html>
+    <head>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/line-awesome/1.3.0/line-awesome/css/line-awesome.min.css">
+    
+    </head>
+
+
    <div class="iq-sidebar  sidebar-default ">
           <div class="iq-sidebar-logo d-flex align-items-center justify-content-between">
-              <a href="dashboard.php" class="header-logo">
-                  <img src="../assets/images/ultronyc-logo.png" class="img-fluid rounded-normal light-logo" alt="logo"><h5 class="logo-title light-logo ml-3">UltraPOS</h5>
+
+<?php
+if(!empty($_SESSION['company_logo']))
+{
+?>
+
+   <a href="dashboard.php" class="header-logo">
+                  <img src="../assets/documents/<?php echo $_SESSION['company_logo']; ?>" class="img-fluid rounded-normal light-logo" alt="logo"><h5 class="logo-title light-logo ml-3">UltraPOS</h5>
               </a>
+
+
+<?php
+}
+else
+{
+?>
+    <img src="../assets/images/default-logo.png"
+         alt="Default Logo"
+         height="45">
+<?php
+}
+?>
+           
+
+              
               <div class="iq-menu-bt-sidebar ml-0">
                   <i class="las la-bars wrapper-menu"></i>
               </div>
@@ -15,19 +44,19 @@
               <nav class="iq-sidebar-menu">
                   <ul id="iq-sidebar-toggle" class="iq-menu">
 
-            <?php 
-            
-                if(isset($_POST['signout'])){
+      <?php
+if(isset($_POST['signout']))
+{
+    session_unset();
+    session_destroy();
 
-                    session_destroy();
-                    echo "<script>
-                    alert('Log Out Successfully');
-                    window.location='../../../index.php';
-                    </script>";
-
-            
-                }
-            ?> 
+    echo "<script>
+        localStorage.setItem('logout_success','1');
+        window.location='../../../index.php';
+    </script>";
+    exit;
+}
+?>
             <?php if(hasPermission('Dashboard Management')){ ?>
 
 
@@ -74,7 +103,7 @@ if(
         <?php if(hasPermission('Company Management')){ ?>
 
                               <li class="">
-                                  <a href="page-list-branch.php">
+                                  <a href="view-owner-company.php?id=<?= $company_id ?>">
                                       <i class="las la-minus"></i><span>Company</span>
                                   </a>
                               </li>
@@ -668,6 +697,10 @@ if(
 
 
 
+
+
+
+
  <?php
 if(
     hasPermission('Report Management')
@@ -859,10 +892,43 @@ if(
                     
                       <li class=" ">
                           <a href="#setting" class="collapsed" data-toggle="collapse" aria-expanded="false">
-       <svg class="svg-icon" width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <circle cx="12" cy="12" r="3"></circle>
-    <path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3"></path>
-</svg>
+                            <svg class="svg-icon" width="20" height="20"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round">
+
+                                <circle cx="12" cy="12" r="3"></circle>
+
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06
+                                        a2 2 0 1 1-2.83 2.83l-.06-.06
+                                        a1.65 1.65 0 0 0-1.82-.33
+                                        1.65 1.65 0 0 0-1 1.51V21
+                                        a2 2 0 1 1-4 0v-.09
+                                        a1.65 1.65 0 0 0-1-1.51
+                                        1.65 1.65 0 0 0-1.82.33l-.06.06
+                                        a2 2 0 1 1-2.83-2.83l.06-.06
+                                        a1.65 1.65 0 0 0 .33-1.82
+                                        1.65 1.65 0 0 0-1.51-1H3
+                                        a2 2 0 1 1 0-4h.09
+                                        a1.65 1.65 0 0 0 1.51-1
+                                        1.65 1.65 0 0 0-.33-1.82l-.06-.06
+                                        a2 2 0 1 1 2.83-2.83l.06.06
+                                        a1.65 1.65 0 0 0 1.82.33H9
+                                        a1.65 1.65 0 0 0 1-1.51V3
+                                        a2 2 0 1 1 4 0v.09
+                                        a1.65 1.65 0 0 0 1 1.51
+                                        1.65 1.65 0 0 0 1.82-.33l.06-.06
+                                        a2 2 0 1 1 2.83 2.83l-.06.06
+                                        a1.65 1.65 0 0 0-.33 1.82V9
+                                        a1.65 1.65 0 0 0 1.51 1H21
+                                        a2 2 0 1 1 0 4h-.09
+                                        a1.65 1.65 0 0 0-1.51 1z"></path>
+
+                            </svg>
                               <span class="ml-4">Settings</span>
                               <svg class="svg-icon iq-arrow-right arrow-active" width="20" height="20" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                   <polyline points="10 15 15 20 20 15"></polyline><path d="M4 4h7a4 4 0 0 1 4 4v12"></path>
@@ -956,6 +1022,13 @@ if(
                                
                           </ul>
                       </li>
+
+
+
+
+
+
+                      
 
                       <li class=" ">
                           <a href="#otherpage" class="collapsed" data-toggle="collapse" aria-expanded="false">
@@ -1356,11 +1429,13 @@ if(
                                   <a href="#" class="search-toggle dropdown-toggle btn border add-btn"
                                       id="dropdownMenuButton02" data-toggle="dropdown" aria-haspopup="true"
                                       aria-expanded="false">
-                                      <img src="../assets/images/small/flag-01.png" alt="img-flag"
-                                          class="img-fluid image-flag mr-2">En
+                                      <img src="../assets/images/small/flag-02.png" alt="img-flag"
+                                          class="img-fluid image-flag mr-2">In
                                   </a>
                                   <div class="iq-sub-dropdown dropdown-menu" aria-labelledby="dropdownMenuButton2">
                                       <div class="card shadow-none m-0">
+
+
                                           <div class="card-body p-3">
                                               <a class="iq-sub-card" href="#"><img
                                                       src="../assets/images/small/flag-02.png" alt="img-flag"
@@ -1378,6 +1453,8 @@ if(
                                                       src="../assets/images/small/flag-06.png" alt="img-flag"
                                                       class="img-fluid mr-2">Japanese</a>
                                           </div>
+
+
                                       </div>
                                   </div>
                               </li>
@@ -1583,10 +1660,13 @@ if(
                                                   <h5 class="mb-1"><?= $full_name ?></h5>
                                                   <p class="mb-0"></p>
                                                   <div class="d-flex align-items-center justify-content-center mt-3">
+
                                                       <a href="profile.php" class="btn border mr-2">Profile</a>
                                                       <form method="post">
                                                       <button name="signout" class="btn border">Sign Out</button>
                                                     </form>
+
+
                                                   </div>
                                               </div>
                                           </div>
@@ -1622,3 +1702,8 @@ if(
               </div>
           </div>
       </div>
+
+
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</html>

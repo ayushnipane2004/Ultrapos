@@ -14,7 +14,10 @@
       <link rel="stylesheet" href="../assets/css/backende209.css?v=1.0.0">
       <link rel="stylesheet" href="../assets/vendor/%40fortawesome/fontawesome-free/css/all.min.css">
       <link rel="stylesheet" href="../assets/vendor/line-awesome/dist/line-awesome/css/line-awesome.min.css">
-      <link rel="stylesheet" href="../assets/vendor/remixicon/fonts/remixicon.css">  </head>
+      <link rel="stylesheet" href="../assets/vendor/remixicon/fonts/remixicon.css"> 
+    
+    
+    </head>
   <body class="  ">
     <!-- loader Start -->
     <div id="loading">
@@ -32,6 +35,42 @@
       
       <?php
 
+
+
+$totalBranch = mysqli_fetch_assoc(mysqli_query($conn,"
+SELECT COUNT(*) total
+FROM branch_master
+WHERE delete_flag='1'
+AND company_id='$company_id'
+"));
+
+// Active Branch
+$activeBranch = mysqli_fetch_assoc(mysqli_query($conn,"
+SELECT COUNT(*) total
+FROM branch_master
+WHERE delete_flag='1'
+AND company_id='$company_id'
+AND status='Active'
+"));
+
+// Inactive Branch
+$inactiveBranch = mysqli_fetch_assoc(mysqli_query($conn,"
+SELECT COUNT(*) total
+FROM branch_master
+WHERE delete_flag='1'
+AND company_id='$company_id'
+AND status='Inactive'
+"));
+
+// Total Employees
+$totalEmployee = mysqli_fetch_assoc(mysqli_query($conn,"
+SELECT COUNT(*) total
+FROM users
+WHERE company_id='$company_id'
+"));
+
+
+
 if(isset($_GET['delete_id']))
 {
     $id = intval($_GET['delete_id']);
@@ -47,22 +86,45 @@ if(isset($_GET['delete_id']))
 
     if($delete)
     {
-        echo "<script>
-                alert('Branch Deleted Successfully');
-                window.location='page-list-branch.php';
-              </script>";
-        exit;
+        echo "
+<script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+
+<script>
+Swal.fire({
+    icon: 'success',
+    title: 'Success!',
+    text: 'Branch deleted Successfully',
+    confirmButtonColor: '#32bdea',
+    confirmButtonText: 'OK'
+}).then((result) => {
+    if(result.isConfirmed){
+        window.location='page-list-branch.php';
+    }
+});
+</script>
+";
+
+
+
     }
 }
 ?>
       
-      
-      
+   
       
       
       <div class="content-page">
      <div class="container-fluid">
         <div class="row">
+
+
+
+
+
+
+
+
+
             <div class="col-lg-12">
                 <div class="d-flex flex-wrap flex-wrap align-items-center justify-content-between mb-4">
                     <div>
@@ -72,6 +134,62 @@ if(isset($_GET['delete_id']))
                     <a href="add-branch.php" class="btn btn-primary add-list"><i class="las la-plus mr-3"></i>Add Branch</a>
                 </div>
             </div>
+
+
+   
+      <div class="row mb-4">
+
+<div class="col-lg-3">
+<div class="card">
+<div class="card-body">
+<h6>Total Branches</h6>
+<h3 class="text-primary">
+<?php echo $totalBranch['total']; ?>
+</h3>
+</div>
+</div>
+</div>
+
+<div class="col-lg-3">
+<div class="card">
+<div class="card-body">
+<h6>Active Branches</h6>
+<h3 class="text-success">
+<?php echo $activeBranch['total']; ?>
+</h3>
+</div>
+</div>
+</div>
+
+<div class="col-lg-3">
+<div class="card">
+<div class="card-body">
+<h6>Inactive Branches</h6>
+<h3 class="text-danger">
+<?php echo $inactiveBranch['total']; ?>
+</h3>
+</div>
+</div>
+</div>
+
+<div class="col-lg-3">
+<div class="card">
+<div class="card-body">
+<h6>Total Employees</h6>
+<h3 class="text-warning">
+<?php echo $totalEmployee['total']; ?>
+</h3>
+</div>
+</div>
+</div>
+
+</div>
+
+
+
+
+
+
             <div class="col-lg-12">
                 <div class="table-responsive rounded mb-3">
 
@@ -86,6 +204,7 @@ if(isset($_GET['delete_id']))
         <th>Branch Code</th>
         <th>Branch Type</th>
         <th>City</th>
+        <th>Total Employees</th>
         <th>Status</th>
         <th>Action</th>
 
@@ -111,6 +230,20 @@ while($row=mysqli_fetch_assoc($sql))
 
 <tr>
 
+
+<?php
+
+$branch_id = $row['id'];
+
+$emp = mysqli_fetch_assoc(mysqli_query($conn,"
+SELECT COUNT(*) total
+FROM users
+WHERE company_id='$company_id'
+AND branch_id='$branch_id'
+"));
+
+?>
+
     <!-- Branch Name -->
     <td>
         <strong><?php echo $row['branch_name']; ?></strong><br>
@@ -123,14 +256,32 @@ while($row=mysqli_fetch_assoc($sql))
     </td>
 
     <!-- Branch Type -->
+
+    
     <td>
         <?php echo $row['branch_type']; ?>
     </td>
+
+
+
 
     <!-- City -->
     <td>
         <?php echo $row['city']; ?>
     </td>
+<td>
+
+<span class="badge badge-primary">
+
+<?php echo $emp['total']; ?>
+
+Employees
+
+</span>
+
+</td>
+
+
 
     <!-- Status -->
     <td>
@@ -159,15 +310,16 @@ while($row=mysqli_fetch_assoc($sql))
             </a>
 
             <a class="badge bg-success mr-2"
-               href="edit-branch.php?id=<?php echo $row['id']; ?>">
+               href="page-edit-branch.php?id=<?php echo $row['id']; ?>">
                 <i class="ri-pencil-line mr-0"></i>
             </a>
 
-            <a class="badge bg-warning mr-2"
-               href="?delete_id=<?php echo $row['id']; ?>"
-               onclick="return confirm('Delete this branch?')">
-                <i class="ri-delete-bin-line mr-0"></i>
-            </a>
+          <a class="badge bg-warning mr-2"
+   href="?delete_id=<?php echo $row['id']; ?>"
+   onclick="return confirmDelete(this.href)">
+
+    <i class="ri-delete-bin-line mr-0"></i>
+</a>
 
         </div>
 
@@ -262,6 +414,32 @@ while($row=mysqli_fetch_assoc($sql))
         </div>
     </footer>
     <!-- Backend Bundle JavaScript -->
+
+    <script>
+function confirmDelete(url)
+{
+    Swal.fire({
+        title: 'Delete Branch?',
+        text: 'This branch will be permanently deleted.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Yes, Delete',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true
+    }).then((result) => {
+
+        if(result.isConfirmed)
+        {
+            window.location.href = url;
+        }
+
+    });
+
+    return false;
+}
+</script>
     <script src="../assets/js/backend-bundle.min.js" type="5099ec83cd38577b2f27e18b-text/javascript"></script>
     
     <!-- Table Treeview JavaScript -->
@@ -272,7 +450,8 @@ while($row=mysqli_fetch_assoc($sql))
     
     <!-- Chart Custom JavaScript -->
     <script async src="../assets/js/chart-custom.js" type="5099ec83cd38577b2f27e18b-text/javascript"></script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <!-- app JavaScript -->
     <script src="../assets/js/app.js" type="5099ec83cd38577b2f27e18b-text/javascript"></script>
   <script src="../../../cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="5099ec83cd38577b2f27e18b-|49" defer></script><script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"41ccecab40284244aa0b52f56036ee92","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>

@@ -14,9 +14,15 @@
       <link rel="shortcut icon" href="https://templates.iqonic.design/posdash/html/assets/images/favicon.ico" />
       <link rel="stylesheet" href="../assets/css/backend-plugin.min.css">
       <link rel="stylesheet" href="../assets/css/backende209.css?v=1.0.0">
+      
       <link rel="stylesheet" href="../assets/vendor/%40fortawesome/fontawesome-free/css/all.min.css">
+
       <link rel="stylesheet" href="../assets/vendor/line-awesome/dist/line-awesome/css/line-awesome.min.css">
+
       <link rel="stylesheet" href="../assets/vendor/remixicon/fonts/remixicon.css">  </head>
+
+
+
   <body class="  ">
     <!-- loader Start -->
     <div id="loading">
@@ -30,14 +36,98 @@
     
     <?php include 'header.php'  ?>
       
-       
+
+    <?php
+date_default_timezone_set("Asia/Kolkata");
+
+$hour = date("H");
+
+if ($hour >= 5 && $hour < 12) {
+    $greeting = "Good Morning";
+} elseif ($hour >= 12 && $hour < 17) {
+    $greeting = "Good Afternoon";
+} elseif ($hour >= 17 && $hour < 21) {
+    $greeting = "Good Evening";
+} else {
+    $greeting = "Good Night";
+}
+?>
+     
+     
+
+
+
+
+
+
+
+
 <div class="content-page">
     <div class="container-fluid">
         <div class="row">
+
+
+
+<?php
+date_default_timezone_set("Asia/Kolkata");
+
+$username = isset($_SESSION['full_name']) ? $_SESSION['full_name'] : "Super Admin";
+?>
+
+<div class="col-lg-12 mt-3">
+    <div class="card shadow-sm border-left-primary">
+        <div class="card-body">
+
+            <div class="row align-items-center">
+
+                <div class="col-md-3 text-center border-right">
+
+<i class="ri-user-3-fill text-primary" style="font-size:42px;"></i>
+                    <h5 class="mt-2 mb-0">
+                        Welcome,
+                    </h5>
+                    <h4 class="text-primary mb-0">
+                        <?php echo $username; ?>
+                    </h4>
+                </div>
+
+                <div class="col-md-3 text-center border-right">
+
+<i class="ri-calendar-2-fill text-success" style="font-size:40px;"></i>
+                    <h6 class="mt-2 mb-1">Today's Date</h6>
+                    <h5 id="todayDate"></h5>
+                </div>
+
+                <div class="col-md-3 text-center border-right">
+
+<i class="ri-time-fill text-warning" style="font-size:40px;"></i>
+
+                    <h6 class="mt-2 mb-1">Current Time</h6>
+                    <h5 id="liveClock"></h5>
+                </div>
+
+                <div class="col-md-3 text-center">
+
+<i class="ri-calendar-event-fill text-info" style="font-size:40px;"></i>
+                    <h6 class="mt-2 mb-1">Today</h6>
+                    <h5 id="todayDay"></h5>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
             <div class="col-lg-4">
                 <div class="card card-transparent card-block card-stretch card-height border-none">
                     <div class="card-body p-0 mt-lg-2 mt-0">
-                        <h3 class="mb-3">Hi <?= $full_name ?>, Good Morning</h3>
+
+
+                        <h3 class="mb-3">Hi <?= $full_name ?>, <?=$greeting ?></h3>
 
 
 
@@ -70,6 +160,20 @@
                     </div>
                 </div>
             </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             <div class="col-lg-8">
                 <div class="row">
                     <div class="col-lg-4 col-md-4">
@@ -100,7 +204,7 @@
                                     </div>
                                     <div>
                                         <p class="mb-2">Total Cost</p>
-                                        <h4>$ 4598</h4>
+                                        <h4>₹ 4598</h4>
                                     </div>
                                 </div>
                                 <div class="iq-progress-bar mt-2">
@@ -439,6 +543,39 @@
             </div>
         </div>
     </footer>
+
+
+
+    
+    <script>
+function updateClock(){
+
+    const now = new Date();
+
+    const optionsDate = {
+        day:'2-digit',
+        month:'long',
+        year:'numeric'
+    };
+
+    const optionsDay = {
+        weekday:'long'
+    };
+
+    document.getElementById("todayDate").innerHTML =
+        now.toLocaleDateString('en-IN', optionsDate);
+
+    document.getElementById("todayDay").innerHTML =
+        now.toLocaleDateString('en-IN', optionsDay);
+
+    document.getElementById("liveClock").innerHTML =
+        now.toLocaleTimeString('en-IN');
+}
+
+updateClock();
+
+setInterval(updateClock,1000);
+</script>
     <!-- Backend Bundle JavaScript -->
     <script src="../assets/js/backend-bundle.min.js" type="58d53e6b89a173d34bd08a2c-text/javascript"></script>
     

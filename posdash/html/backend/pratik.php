@@ -1,736 +1,229 @@
+
+<?php
+
+include 'db.php';
+
+if(!isset($_GET['id'])) {
+    header("Location: pratik.php");
+    exit;
+}
+
+$id = intval($_GET['id']);
+$result = mysqli_query($conn,"SELECT * FROM supplier WHERE id='$id'");
+if(mysqli_num_rows($result)==0) {
+    die("Supplier Not Found");
+}
+$row = mysqli_fetch_assoc($result);
+
+$update_success = false;
+
+if(isset($_POST['update'])) {
+    $supplier_name   = mysqli_real_escape_string($conn,$_POST['supplier_name']);
+    $email           = mysqli_real_escape_string($conn,$_POST['email']);
+    $phone           = mysqli_real_escape_string($conn,$_POST['phone']);
+    $gst_no          = mysqli_real_escape_string($conn,$_POST['gst_no']);
+    $pan_no          = mysqli_real_escape_string($conn,$_POST['pan_no']);
+    $address         = mysqli_real_escape_string($conn,$_POST['address']);
+    $bank_name       = mysqli_real_escape_string($conn,$_POST['bank_name']);
+    $branch_name     = mysqli_real_escape_string($conn,$_POST['branch_name']);
+    $account_holder  = mysqli_real_escape_string($conn,$_POST['account_holder']);
+    $account_number  = mysqli_real_escape_string($conn,$_POST['account_number']);
+    $ifsc_code       = mysqli_real_escape_string($conn,$_POST['ifsc_code']);
+    $opening_balance = mysqli_real_escape_string($conn,$_POST['opening_balance']);
+    $notes           = mysqli_real_escape_string($conn,$_POST['notes']);
+
+    mysqli_query($conn,"UPDATE supplier SET 
+        supplier_name='$supplier_name', email='$email', phone='$phone', 
+        gst_no='$gst_no', pan_no='$pan_no', address='$address',
+        bank_name='$bank_name', branch_name='$branch_name', 
+        account_holder='$account_holder', account_number='$account_number', 
+        ifsc_code='$ifsc_code', opening_balance='$opening_balance', 
+        notes='$notes' WHERE id='$id'");
+
+    $update_success = true;
+}
+?>
+
 <!doctype html>
 <html lang="en">
-
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>POS Dash | Responsive Bootstrap 4 Admin Dashboard Template</title>
-    
-    <!-- Favicon -->
-    <link rel="shortcut icon" href="https://templates.iqonic.design/posdash/html/assets/images/favicon.ico" />
+    <title>Edit Supplier – UltraPOS</title>
+
+    <!-- ✅ YOUR ORIGINAL LOCAL CSS FILES – DO NOT REMOVE -->
     <link rel="stylesheet" href="../assets/css/backend-plugin.min.css">
     <link rel="stylesheet" href="../assets/css/backende209.css?v=1.0.0">
-    <link rel="stylesheet" href="../assets/vendor/%40fortawesome/fontawesome-free/css/all.min.css">
-    <link rel="stylesheet" href="../assets/vendor/line-awesome/dist/line-awesome/css/line-awesome.min.css">
-    <link rel="stylesheet" href="../assets/vendor/remixicon/fonts/remixicon.css">  
-    
-    <style>
-        /* ===== Wizard Styles (same as User Registration Wizard) ===== */
-        .wizard-steps-wrapper {
-            margin-bottom: 30px;
-            position: relative;
-        }
-        .wizard-nav {
-            display: flex;
-            justify-content: space-between;
-            padding: 0;
-            margin: 0 0 10px 0;
-            list-style: none;
-            position: relative;
-        }
-        .wizard-nav .step-item {
-            flex: 1;
-            text-align: center;
-            position: relative;
-            cursor: default;
-        }
-        .wizard-nav .step-item .nav-link {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 8px 0;
-            background: transparent !important;
-            border: none !important;
-            color: #9aa5b5;
-            transition: all 0.3s ease;
-            position: relative;
-            cursor: default;
-            pointer-events: none;
-        }
-        .wizard-nav .step-item .step-circle {
-            width: 40px;
-            height: 40px;
-            line-height: 40px;
-            border-radius: 50%;
-            background: #e9ecef;
-            color: #6c757d;
-            font-weight: 700;
-            font-size: 16px;
-            display: inline-block;
-            margin-bottom: 6px;
-            transition: all 0.3s ease;
-            border: 3px solid transparent;
-        }
-        .wizard-nav .step-item .step-label {
-            font-size: 13px;
-            font-weight: 600;
-            color: #6c757d;
-            transition: all 0.3s ease;
-        }
-        .wizard-nav .step-item.active .step-circle {
-            background: #32bdea;
-            color: #fff;
-            border-color: #32bdea;
-            box-shadow: 0 0 0 4px rgba(50, 189, 234, 0.25);
-        }
-        .wizard-nav .step-item.active .step-label {
-            color: #32bdea;
-        }
-        .wizard-nav .step-item.completed .step-circle {
-            background: #78c091;
-            color: #fff;
-            border-color: #78c091;
-        }
-        .wizard-nav .step-item.completed .step-label {
-            color: #78c091;
-        }
-        .wizard-nav .step-item:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            top: 20px;
-            left: calc(50% + 25px);
-            right: calc(-50% + 25px);
-            height: 3px;
-            background: #e9ecef;
-            z-index: 0;
-        }
-        .wizard-nav .step-item.completed:not(:last-child)::after {
-            background: #78c091;
-        }
-        .wizard-nav .step-item.active:not(:last-child)::after {
-            background: #e9ecef;
-        }
+    <link rel="stylesheet" href="../assets/vendor/remixicon/fonts/remixicon.css">
 
-        .wizard-progress {
-            height: 6px;
-            background: #e9ecef;
-            border-radius: 4px;
-            margin: 10px 0 0 0;
-            overflow: hidden;
-            position: relative;
-        }
-        .wizard-progress .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #32bdea, #158df7);
-            border-radius: 4px;
-            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            width: 20%;
-        }
+    <!-- SweetAlert2 (add this new) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        .wizard-section {
-            display: none;
-            animation: fadeSlide 0.4s ease forwards;
-        }
-        .wizard-section.active {
-            display: block;
-        }
-        @keyframes fadeSlide {
-            0% { opacity: 0; transform: translateY(20px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
-
-        .wizard-navigation {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #dcdfe8;
-        }
-        .wizard-navigation .btn {
-            min-width: 120px;
-            padding: 10px 25px;
-            border-radius: 30px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        .wizard-navigation .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        .wizard-navigation .btn-primary {
-            background: linear-gradient(135deg, #32bdea, #158df7);
-            border: none;
-            color: #fff;
-        }
-        .wizard-navigation .btn-primary:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(50, 189, 234, 0.35);
-        }
-        .wizard-navigation .btn-success {
-            background: linear-gradient(135deg, #78c091, #55b075);
-            border: none;
-            color: #fff;
-        }
-        .wizard-navigation .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(120, 192, 145, 0.35);
-        }
-
-        @media (max-width: 768px) {
-            .wizard-nav .step-item .step-label {
-                font-size: 11px;
-            }
-            .wizard-nav .step-item .step-circle {
-                width: 32px;
-                height: 32px;
-                line-height: 32px;
-                font-size: 13px;
-            }
-            .wizard-nav .step-item:not(:last-child)::after {
-                top: 16px;
-                left: calc(50% + 18px);
-                right: calc(-50% + 18px);
-            }
-            .wizard-navigation {
-                flex-direction: column;
-                gap: 10px;
-            }
-            .wizard-navigation .btn {
-                width: 100%;
-                min-width: unset;
-            }
-        }
-        @media (max-width: 480px) {
-            .wizard-nav .step-item .step-label {
-                font-size: 9px;
-            }
-            .wizard-nav .step-item .step-circle {
-                width: 26px;
-                height: 26px;
-                line-height: 26px;
-                font-size: 11px;
-                margin-bottom: 3px;
-            }
-            .wizard-nav .step-item:not(:last-child)::after {
-                top: 13px;
-                left: calc(50% + 14px);
-                right: calc(-50% + 14px);
-            }
-        }
-    </style>
+    <!-- ✅ NEW CUSTOM CSS (add after your CSS) -->
+   
 </head>
 
-<body class="  ">
-    <!-- loader Start -->
-    <div id="loading">
-        <div id="loading-center">
-        </div>
-    </div>
-    <!-- loader END -->
-    <?php
-    include 'db.php';
-
-    if(isset($_POST['register']))
-    {
-        $company_name   = mysqli_real_escape_string($conn, $_POST['company_name']);
-        $mobile         = mysqli_real_escape_string($conn, $_POST['mobile']);
-        $email          = mysqli_real_escape_string($conn, $_POST['email']);
-        $gst_no         = mysqli_real_escape_string($conn, $_POST['gst_no']);
-        $city         = mysqli_real_escape_string($conn, $_POST['city']);
-        $state         = mysqli_real_escape_string($conn, $_POST['state']);
-        $country         = mysqli_real_escape_string($conn, $_POST['country']);
-        $address        = mysqli_real_escape_string($conn, $_POST['address']);
-        $currency       = mysqli_real_escape_string($conn, $_POST['currency']);
-        $financial_year = mysqli_real_escape_string($conn, $_POST['financial_year']);
-        $status         = mysqli_real_escape_string($conn, $_POST['status']);
-        $businesstype   = mysqli_real_escape_string($conn, $_POST['businesstype']);
-        $ownername   = mysqli_real_escape_string($conn, $_POST['ownername']);
-        $contactpersonname   = mysqli_real_escape_string($conn, $_POST['contactpersonname']);
-        $contactmobno       = mysqli_real_escape_string($conn, $_POST['contactmob']);
-        $alternatemob       = mysqli_real_escape_string($conn, $_POST['alternatemob']);
-        $contactpersonemail       = mysqli_real_escape_string($conn, $_POST['contactpersonemail']);
-        $website       = mysqli_real_escape_string($conn, $_POST['website']);
-        $pincode       = mysqli_real_escape_string($conn, $_POST['pincode']);
-        $date_of_birth = mysqli_real_escape_string($conn,$_POST['date_of_birth']);
-        $gender = mysqli_real_escape_string($conn,$_POST['gender']);
-        $username       = mysqli_real_escape_string($conn, $_POST['username']);
-        $password       = $_POST['password'];
-        $confirm_password = $_POST['confirm_password'];
-        
-
-        if($password != $confirm_password)
-        {
-            echo "<script>
-            alert('Password does not match');
-            window.history.back();
-            </script>";
-            exit;
-        }
-
-        $check = mysqli_query($conn,"SELECT * FROM company_master WHERE email='$email'");
-
-        if(mysqli_num_rows($check)>0)
-        {
-            echo "<script>
-            alert('Company Email Already Exists');
-            window.history.back();
-            </script>";
-            exit;
-        }
-
-        $checkUser = mysqli_query($conn,"SELECT * FROM users WHERE username='$username'");
-
-        if(mysqli_num_rows($checkUser)>0)
-        {
-            echo "<script>
-            alert('Username Already Exists');
-            window.history.back();
-            </script>";
-            exit;
-        }
-
-        $logo="";
-
-        if($_FILES['company_logo']['name']!="")
-        {
-            $logo=time()."_".$_FILES['company_logo']['name'];
-
-            move_uploaded_file(
-                $_FILES['company_logo']['tmp_name'],
-                "../assets/documents/".$logo
-            );
-        }
-        $ownerimg="";
-
-        if($_FILES['company_ownerimg']['name']!="")
-        {
-            $ownerimg=time()."_".$_FILES['company_ownerimg']['name'];
-
-            move_uploaded_file(
-                $_FILES['company_ownerimg']['tmp_name'],
-                 "../assets/ownerimage/".$ownerimg
-            );
-        }
-    
-        $company = mysqli_query($conn,"
-        INSERT INTO company_master
-        (
-            company_name,
-            company_logo,
-            mobile,
-            email,
-            gst_no,
-            city,
-            state,
-            country,
-            address,
-            currency,
-            financial_year,
-            status,
-            businesstype,
-            ownername,
-            contactpersonname,
-            contactmob,
-            alternatemob,
-            contactpersonemail,
-            website,
-            username,
-            company_ownerimg
-        )
-        VALUES
-        (
-            '$company_name',
-            '$logo',
-            '$mobile',
-            '$email',
-            '$gst_no',
-            '$city',
-            '$state',
-            '$country',
-            '$address',
-            '$currency',
-            '$financial_year',
-            '$status',
-            '$businesstype',
-            '$ownername',
-            '$contactpersonname',
-            '$contactmobno',
-            '$alternatemob',
-            '$contactpersonemail',
-            '$website',
-            '$username',
-            '$ownerimg'
-        )");
-
-        if($company) {
-        
-    $company_id = mysqli_insert_id($conn);
-            $hash_password = password_hash($password,PASSWORD_DEFAULT);
-           mysqli_query($conn,"
-                INSERT INTO users
-                (
-                full_name,
-                mobile,
-                alternate_mobile,
-                email,
-                username,
-                profile_photo,
-                gender,
-                date_of_birth,
-                address,
-                city,
-                state,
-                country,
-                pincode,
-                company_id,
-                role_id,
-                password,
-                status
-                )
-                VALUES
-                (
-                '$ownername',
-                '$contactmobno',
-                '$alternatemob',
-                '$email',
-                '$username',
-                '$ownerimg',
-                '$gender',
-                '$date_of_birth',
-                '$address',
-                '$city',
-                '$state',
-                '$country',
-                '$pincode',
-                '$company_id',
-                1,
-                '$hash_password',
-                'Active'
-                )");
-            echo "<script>
-            alert('Company Registered Successfully');
-            window.location='super-dashboard.php';
-            </script>";
-        }
-        else
-        {
-            echo "<script>
-            alert('Registration Failed');
-            </script>";
-        }
-    }
-    ?>
-    <!-- Wrapper Start -->
-    <div class="wrapper">
-    <?php include 'super-header.php' ?>
+<body>
+<div class="wrapper">
+    <?php include 'header.php'; ?>
 
     <div class="content-page">
+
+          
         <div class="container-fluid">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between">
-                    <div class="header-title">
-                        <h4 class="card-title">Add Company</h4>
+
+            <a href="supplier_show.php" class="btn btn-secondary">
+                <i class="ri-arrow-left-line"></i> Back
+            </a>
+    
+
+            <div class="supplier-edit-card">
+               
+                <!-- Profile Header -->
+                <div class="profile-header">
+                    <i class="ri-store-3-line supplier-icon"></i>
+                    <div class="supplier-info">
+
+                        <h2><?php echo htmlspecialchars($row['supplier_name']); ?></h2>
+                        <div class="code">Code: <?php echo htmlspecialchars($row['supplier_code']); ?></div>
                     </div>
+                    <span class="badge badge-<?php echo ($row['status']=="Active") ? "success":"danger"; ?> status-badge">
+                        <?php echo $row['status']; ?>
+                    </span>
                 </div>
-            </div>
 
-            <div class="card">
-                <form method="post" enctype="multipart/form-data" id="wizardForm">
+                <div class="card-body">
+                    <form method="post" id="supplierForm" novalidate>
 
-                    <!-- ===== WIZARD STEPS ===== -->
-                    <div class="wizard-steps-wrapper">
-                        <ul class="nav nav-pills nav-justified wizard-nav" id="wizardNav">
-                            <li class="nav-item step-item active" data-step="1">
-                                <a class="nav-link" href="#">
-                                    <span class="step-circle">1</span>
-                                    <span class="step-label">Company Info</span>
-                                </a>
-                            </li>
-                            <li class="nav-item step-item" data-step="2">
-                                <a class="nav-link" href="#">
-                                    <span class="step-circle">2</span>
-                                    <span class="step-label">Address</span>
-                                </a>
-                            </li>
-                            <li class="nav-item step-item" data-step="3">
-                                <a class="nav-link" href="#">
-                                    <span class="step-circle">3</span>
-                                    <span class="step-label">Owner</span>
-                                </a>
-                            </li>
-                            <li class="nav-item step-item" data-step="4">
-                                <a class="nav-link" href="#">
-                                    <span class="step-circle">4</span>
-                                    <span class="step-label">Login</span>
-                                </a>
-                            </li>
-                        </ul>
-                        <div class="wizard-progress">
-                            <div class="progress-bar" id="wizardProgressBar" style="width: 20%;"></div>
-                        </div>
-                    </div>
-
-                    <!-- ===== WIZARD SECTIONS ===== -->
-                    <div class="wizard-sections">
-
-                        <!-- STEP 1: Company Information -->
-                        <div class="wizard-section active" data-step="1">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4 class="card-title">Company Information</h4>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Company Name <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" name="company_name" placeholder="Enter Company Name" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>GST Number <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" name="gst_no" placeholder="Enter GST Number" pattern="^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Email <span class="text-danger">*</span></label>
-                                                <input type="email" class="form-control" name="email" placeholder="Enter Email" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Mobile Number <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" name="mobile" placeholder="Enter Mobile Number" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Business Type</label>
-                                                <input type="text" class="form-control" name="businesstype" placeholder="Enter Business Type">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Website</label>
-                                                <input type="text" class="form-control" name="website" placeholder="https://example.com">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Status *</label>
-                                                <select class="form-control" name="status">
-                                                    <option value="Active">Active</option>
-                                                    <option value="Inactive">Inactive</option>
-                                                </select>
-                                                <div class="help-block with-errors"></div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Company Logo</label>
-                                                <input type="file" class="form-control" name="company_logo" accept=".jpg,.jpeg,.png">
-                                            </div>
-                                        </div>
+                        <!-- Section 1 -->
+                        <div class="section-title"><i class="ri-user-line"></i> Supplier Information</div>
+                        <div class="row">
+                            <div class="col-md-4 form-group">
+                                <label>Supplier Code</label>
+                                <input type="text" class="form-control" value="<?php echo $row['supplier_code']; ?>" readonly>
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label>Supplier Name <span class="required-star">*</span></label>
+                                <input type="text" name="supplier_name" class="form-control" id="supplier_name"
+                                       value="<?php echo htmlspecialchars($row['supplier_name']); ?>" required>
+                                <div class="invalid-feedback">Supplier name is required.</div>
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label>Mobile <span class="required-star">*</span></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="ri-phone-line"></i></span>
                                     </div>
+                                    <input type="text" id="phone" name="phone" class="form-control"
+                                           value="<?php echo htmlspecialchars($row['phone']); ?>" placeholder="10-digit mobile number" required>
+                                    <div class="invalid-feedback" id="phone_error"></div>
                                 </div>
                             </div>
-                        </div>
-
-                        <!-- STEP 2: Address Information -->
-                        <div class="wizard-section" data-step="2">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4 class="card-title">Address Information</h4>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Address <span class="text-danger">*</span></label>
-                                                <textarea class="form-control" rows="3" name="address" placeholder="Enter Full Address" required></textarea>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label>City <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" name="city" placeholder="Enter City" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label>State <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" name="state" placeholder="Enter State" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label>Country <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" name="country" placeholder="Enter Country" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label>Pincode <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" name="pincode" placeholder="Enter Pincode" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label>Currency</label>
-                                                <select class="form-control" name="currency">
-                                                    <option value="INR">INR</option>
-                                                    <option value="USD">USD</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label>Financial Year</label>
-                                                <input type="text" class="form-control" name="financial_year" placeholder="2026-2027">
-                                            </div>
-                                        </div>
+                            <div class="col-md-4 form-group">
+                                <label>Email <span class="required-star">*</span></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="ri-mail-line"></i></span>
                                     </div>
+                                    <input type="email" id="email" name="email" class="form-control"
+                                           value="<?php echo htmlspecialchars($row['email']); ?>" placeholder="example@domain.com" required>
+                                    <div class="invalid-feedback" id="email_error"></div>
                                 </div>
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label>GST Number <span class="required-star">*</span></label>
+                                <input type="text" id="gst_no" name="gst_no" class="form-control"
+                                       value="<?php echo htmlspecialchars($row['gst_no']); ?>" placeholder="22AAAAA0000A1Z5" required>
+                                <div class="invalid-feedback" id="gst_error"></div>
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label>PAN Number <span class="required-star">*</span></label>
+                                <input type="text" id="pan_no" name="pan_no" class="form-control"
+                                       value="<?php echo htmlspecialchars($row['pan_no']); ?>" placeholder="AAAAA0000A" required>
+                                <div class="invalid-feedback" id="pan_error"></div>
                             </div>
                         </div>
 
-                        <!-- STEP 3: Owner Information -->
-                        <div class="wizard-section" data-step="3">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4 class="card-title">Owner Information</h4>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Owner Name <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" name="ownername" placeholder="Enter Owner Name" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Contact Person Name <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" name="contactpersonname" placeholder="Enter Contact Person Name" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Mobile Number <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" name="contactmob" placeholder="Enter Mobile Number" required>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Alternate Mobile</label>
-                                                <input type="text" class="form-control" name="alternatemob" placeholder="Enter Alternate Mobile">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-group">
-                                                <label>Contact Email</label>
-                                                <input type="email" class="form-control" name="contactpersonemail" placeholder="Enter Contact Email">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label>Gender</label>
-                                                <select class="form-control" name="gender">
-                                                    <option value="">Select Gender</option>
-                                                    <option value="Male">Male</option>
-                                                    <option value="Female">Female</option>
-                                                    <option value="Other">Other</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <div class="form-group">
-                                                <label>Date of Birth</label>
-                                                <input type="date" class="form-control" name="date_of_birth">
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="form-group">
-                                                <label>Owner Image</label>
-                                                <input type="file" class="form-control" name="company_ownerimg" accept=".jpg,.jpeg,.png">
-                                            </div>
-                                        </div>
+                        <!-- Section 2 -->
+                        <div class="section-title"><i class="ri-map-pin-line"></i> Address Information</div>
+                        <div class="row">
+                            <div class="col-12 form-group">
+                                <label>Address</label>
+                                <input type="text" name="address" class="form-control"
+                                       value="<?php echo htmlspecialchars($row['address']); ?>" placeholder="Full address">
+                            </div>
+                        </div>
+
+                        <!-- Section 3 -->
+                        <div class="section-title"><i class="ri-bank-line"></i> Bank Details</div>
+                        <div class="row">
+                            <div class="col-md-4 form-group">
+                                <label>Bank Name</label>
+                                <input type="text" name="bank_name" class="form-control"
+                                       value="<?php echo htmlspecialchars($row['bank_name']); ?>" placeholder="e.g. State Bank of India">
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label>Branch Name</label>
+                                <input type="text" name="branch_name" class="form-control"
+                                       value="<?php echo htmlspecialchars($row['branch_name']); ?>" placeholder="Branch">
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label>Account Holder</label>
+                                <input type="text" name="account_holder" class="form-control"
+                                       value="<?php echo htmlspecialchars($row['account_holder']); ?>" placeholder="Account holder name">
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>Account Number</label>
+                                <input type="text" name="account_number" id="account_number" class="form-control"
+                                       value="<?php echo htmlspecialchars($row['account_number']); ?>" placeholder="Account number (digits only)">
+                                <div class="invalid-feedback" id="account_error"></div>
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label>IFSC Code <span class="required-star">*</span></label>
+                                <input type="text" id="ifsc_code" name="ifsc_code" class="form-control"
+                                       value="<?php echo htmlspecialchars($row['ifsc_code']); ?>" placeholder="SBIN0001234" required>
+                                <div class="invalid-feedback" id="ifsc_error"></div>
+                            </div>
+                        </div>
+
+                        <!-- Section 4 -->
+                        <div class="section-title"><i class="ri-wallet-3-line"></i> Financial Information</div>
+                        <div class="row">
+                            <div class="col-md-6 form-group">
+                                <label>Opening Balance</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">₹</span>
                                     </div>
+                                    <input type="text" name="opening_balance" class="form-control" id="opening_balance"
+                                           value="<?php echo number_format($row['opening_balance'],2); ?>">
                                 </div>
                             </div>
                         </div>
 
-                        <!-- STEP 4: Login Information + Submit -->
-                        <div class="wizard-section" data-step="4">
-                            <div class="card">
-                                <div class="card-header">
-                                    <h4 class="card-title">Login Information</h4>
-                                </div>
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-md-4">
-                                            <div class="form-group">
-                                                <label>Username <span class="text-danger">*</span></label>
-                                                <input type="text" class="form-control" name="username" placeholder="Enter Username" required>
-                                            </div>
-                                        </div>
-
-
-
-                                     <div class="col-md-4">
-    <div class="form-group">
-        <label>Password <span class="text-danger">*</span></label>
-        <input type="password"
-               class="form-control"
-               id="password"
-               name="password"
-               placeholder="Enter Password"
-               required>
-    </div>
-</div>
-
-<div class="col-md-4">
-    <div class="form-group">
-        <label>Confirm Password <span class="text-danger">*</span></label>
-        <input type="password"
-               class="form-control"
-               id="confirm_password"
-               name="confirm_password"
-               placeholder="Confirm Password"
-               required>
-
-        <small id="password_message" class="font-weight-bold"></small>
-    </div>
-</div>
-
-
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Submit Buttons (inside final step) -->
-                            <div class="card mt-3">
-                                <div class="card-body text-center">
-                                    <button type="submit" name="register" class="btn btn-primary mr-2">
-                                        <i class="ri-save-line"></i> Add Company
-                                    </button>
-                                    <button type="reset" class="btn btn-danger">
-                                        <i class="ri-refresh-line"></i> Reset
-                                    </button>
-                                </div>
-                            </div>
+                        <!-- Section 5 -->
+                        <div class="section-title"><i class="ri-file-text-line"></i> Notes</div>
+                        <div class="form-group">
+                            <textarea name="notes" class="form-control" rows="3" placeholder="Additional notes..."><?php echo htmlspecialchars($row['notes']); ?></textarea>
                         </div>
 
-                    </div><!-- /.wizard-sections -->
+                        <!-- Buttons -->
+                        <div class="text-right mt-5">
+                           
+                            <button type="submit" name="update" id="updateBtn" class="btn btn-primary ml-2">
+                                <i class="ri-check-line"></i> Update Supplier
+                            </button>
+                            <button type="button" onclick="window.print()" class="btn btn-success ml-2">
+                                <i class="ri-printer-line"></i> Print
+                            </button>
+                        </div>
+                    </form>
+                </div><!-- card-body -->
+            </div><!-- card -->
+        </div><!-- container -->
+    </div><!-- content-page -->
 
-                    <!-- ===== WIZARD NAVIGATION ===== -->
-                    <div class="wizard-navigation mt-4">
-                        <button type="button" class="btn btn-secondary" id="prevBtn" disabled>Previous</button>
-                        <button type="button" class="btn btn-primary" id="nextBtn">Next</button>
-                    </div>
-
-                </form>
-            </div>
-        </div>
-    </div>
-    </div>
-
-    <!-- Wrapper End -->
-
+    <!-- ✅ YOUR ORIGINAL FOOTER & SCRIPTS – KEEP EXACTLY AS BEFORE -->
     <footer class="iq-footer">
         <div class="container-fluid">
             <div class="card">
@@ -743,201 +236,254 @@
                             </ul>
                         </div>
                         <div class="col-lg-6 text-right">
-                            <span class="mr-1"><script>document.write(new Date().getFullYear())</script> ©</span>
-                            <a href="#">POS Dash</a>
+                            <span class="mr-1"><script>document.write(new Date().getFullYear())</script>©</span> <a href="#">POS Dash</a>.
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </footer>
+</div><!-- wrapper -->
 
-    <!-- Backend Bundle JavaScript -->
-    <script src="../assets/js/backend-bundle.min.js"></script>
-    <script src="../assets/js/table-treeview.js"></script>
-    <script src="../assets/js/customizer.js"></script>
-    <script src="../assets/js/chart-custom.js"></script>
-    <script src="../assets/js/app.js"></script>
 
-    <!-- ===== WIZARD JAVASCRIPT (fixed version with validation) ===== -->
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const sections = document.querySelectorAll('.wizard-section');
-        const stepItems = document.querySelectorAll('.step-item');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const progressBar = document.getElementById('wizardProgressBar');
-        let currentStep = 1;
-        const totalSteps = sections.length;
-
-        function updateWizard() {
-            sections.forEach((section) => {
-                const stepNum = parseInt(section.dataset.step);
-                section.classList.toggle('active', stepNum === currentStep);
-            });
-
-            stepItems.forEach((item) => {
-                const stepNum = parseInt(item.dataset.step);
-                item.classList.remove('active', 'completed');
-                if (stepNum === currentStep) {
-                    item.classList.add('active');
-                } else if (stepNum < currentStep) {
-                    item.classList.add('completed');
-                }
-            });
-
-            const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
-            progressBar.style.width = progress + '%';
-
-            prevBtn.disabled = (currentStep === 1);
-            if (currentStep === totalSteps) {
-                nextBtn.textContent = 'Submit';
-                nextBtn.classList.add('btn-success');
-                nextBtn.classList.remove('btn-primary');
-            } else {
-                nextBtn.textContent = 'Next';
-                nextBtn.classList.remove('btn-success');
-                nextBtn.classList.add('btn-primary');
-            }
-
-            const wrapper = document.querySelector('.wizard-steps-wrapper');
-            if (wrapper) {
-                wrapper.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+ <style>
+        body {
+            background: #f4f7fb;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
-        function goToStep(step) {
-            if (step < 1) step = 1;
-            if (step > totalSteps) step = totalSteps;
-            currentStep = step;
-            updateWizard();
+        .supplier-edit-card {
+            background: #fff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.08);
+            margin: 30px 0 50px;
         }
-
-        // -------- VALIDATE CURRENT STEP --------
-        function validateCurrentStep() {
-            const currentSection = document.querySelector('.wizard-section.active');
-            if (!currentSection) return true;
-
-            const requiredFields = currentSection.querySelectorAll('[required]');
-            let isValid = true;
-
-            for (let field of requiredFields) {
-                if (field.offsetParent === null) continue;
-                if (!field.checkValidity()) {
-                    field.reportValidity();
-                    field.focus();
-                    isValid = false;
-                    break;
-                }
-            }
-            return isValid;
+        .profile-header {
+            background: linear-gradient(135deg, #32bdea, #158df7);
+            color: white;
+            padding: 2.5rem 2rem;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
         }
-
-        function nextStep() {
-            if (!validateCurrentStep()) {
-                return;
-            }
-
-            if (currentStep < totalSteps) {
-                goToStep(currentStep + 1);
-            } else {
-                document.getElementById('wizardForm').submit();
-            }
+        .profile-header .supplier-icon {
+            font-size: 4rem;
+            opacity: 0.9;
         }
-
-        function prevStep() {
-            if (currentStep > 1) {
-                goToStep(currentStep - 1);
-            }
+        .profile-header .supplier-info h2 {
+            font-weight: 700;
+            margin-bottom: 0.2rem;
         }
+        .profile-header .code {
+            font-size: 0.95rem;
+            opacity: 0.85;
+        }
+        .profile-header .status-badge {
+            margin-left: auto;
+            font-size: 1rem;
+            padding: 0.5rem 1.5rem;
+            border-radius: 30px;
+            font-weight: 600;
+        }
+        .section-title {
+            background: #eef8ff;
+            border-left: 5px solid #32bdea;
+            padding: 0.7rem 1.5rem;
+            font-size: 1.15rem;
+            font-weight: 600;
+            margin: 2rem 0 1.5rem;
+            border-radius: 0 10px 10px 0;
+            color: #1a3b5d;
+        }
+        .section-title i { margin-right: 0.5rem; color: #32bdea; }
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #495057;
+            margin-bottom: 0.3rem;
+        }
+        .required-star { color: #dc3545; margin-left: 2px; }
+        .form-control {
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
+            padding: 0.6rem 1rem;
+            transition: all 0.2s ease;
+        }
+        .form-control:focus {
+            border-color: #32bdea;
+            box-shadow: 0 0 0 0.2rem rgba(50,189,234,0.15);
+        }
+        .form-control.is-valid {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.2rem rgba(40,167,69,0.15);
+        }
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.2rem rgba(220,53,69,0.15);
+        }
+        .invalid-feedback { font-size: 0.8rem; margin-top: 0.25rem; }
+        .input-group-text {
+            border-radius: 10px 0 0 10px;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            color: #6c757d;
+        }
+        .input-group .form-control { border-radius: 0 10px 10px 0; }
+        .btn {
+            border-radius: 10px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            transition: all 0.2s;
+        }
+        .btn-primary { background: #32bdea; border-color: #32bdea; }
+        .btn-primary:hover { background: #2aa8d1; border-color: #2aa8d1; }
+        .btn-secondary { background: #6c757d; border-color: #6c757d; }
+        .btn-success { background: #28a745; border-color: #28a745; }
+        .btn .spinner-border {
+            width: 1rem; height: 1rem; margin-right: 0.3rem;
+        }
+        @media (max-width: 768px) {
+            .profile-header { flex-direction: column; text-align: center; }
+            .profile-header .status-badge { margin-left: 0; }
+        }
+    </style>
 
-        // -------- DISABLE STEP CIRCLE CLICKS --------
-        stepItems.forEach((item) => {
-            item.style.cursor = 'default';
-            const link = item.querySelector('.nav-link');
-            if (link) {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return false;
-                });
-            }
-        });
 
-        // -------- BUTTON EVENTS --------
-        nextBtn.addEventListener('click', nextStep);
-        prevBtn.addEventListener('click', prevStep);
+<!-- ✅ ORIGINAL BACKEND SCRIPTS -->
+<script src="../assets/js/backend-bundle.min.js"></script>
+<script src="../assets/js/table-treeview.js"></script>
+<script src="../assets/js/customizer.js"></script>
+<script src="../assets/js/chart-custom.js"></script>
+<script src="../assets/js/app.js"></script>
 
-        // -------- KEYBOARD NAVIGATION --------
-        document.addEventListener('keydown', function(e) {
-            const tag = e.target.tagName.toLowerCase();
-            if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+<!-- ✅ NEW CUSTOM JS (add after all original scripts) -->
 
-            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-                e.preventDefault();
-                nextStep();
-            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-                e.preventDefault();
-                prevStep();
-            }
-        });
 
-        // -------- ENTER KEY ON FORM FIELDS --------
-        document.querySelectorAll('input, select, textarea').forEach(function(field) {
-            field.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    if (currentStep === totalSteps) {
-                        if (validateCurrentStep()) {
-                            document.getElementById('wizardForm').submit();
-                        }
-                    } else {
-                        nextStep();
-                    }
-                }
-            });
-        });
 
-        updateWizard();
+
+<script>
+$(document).ready(function() {
+
+    // Utility
+    function showValid($input) { $input.removeClass('is-invalid').addClass('is-valid'); }
+    function showInvalid($input, msg) {
+        $input.removeClass('is-valid').addClass('is-invalid');
+        $input.siblings('.invalid-feedback').text(msg);
+    }
+    function clearValidation($input) { $input.removeClass('is-valid is-invalid'); }
+
+    // Auto uppercase & trim
+    $('#gst_no, #pan_no, #ifsc_code').on('input', function() {
+        $(this).val($(this).val().toUpperCase());
     });
-    </script>
+    $('input, textarea').on('blur', function() {
+        $(this).val($.trim($(this).val()));
+    });
 
+    // Real-time validation
+    $('#phone').on('keyup blur', function() {
+        var val = $(this).val().trim();
+        if(val === '') { clearValidation($(this)); $('#phone_error').text(''); return; }
+        if(/^[0-9]{10}$/.test(val)) { showValid($(this)); $('#phone_error').text(''); checkDuplicate('phone', val, $('#phone'), $('#phone_error')); }
+        else { showInvalid($(this), 'Enter a valid 10-digit mobile number'); $('#phone_error').text('Enter a valid 10-digit mobile number'); }
+    });
 
-        <script>
+    $('#email').on('keyup blur', function() {
+        var val = $(this).val().trim();
+        if(val === '') { clearValidation($(this)); $('#email_error').text(''); return; }
+        if(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { showValid($(this)); $('#email_error').text(''); checkDuplicate('email', val, $('#email'), $('#email_error')); }
+        else { showInvalid($(this), 'Enter a valid email address'); $('#email_error').text('Enter a valid email address'); }
+    });
 
-            const password = document.getElementById("password");
-const confirmPassword = document.getElementById("confirm_password");
-const message = document.getElementById("password_message");
+    $('#gst_no').on('keyup blur', function() {
+        var val = $(this).val().trim().toUpperCase(); $(this).val(val);
+        if(val === '') { clearValidation($(this)); $('#gst_error').text(''); return; }
+        if(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(val)) { showValid($(this)); $('#gst_error').text(''); checkDuplicate('gst_no', val, $('#gst_no'), $('#gst_error')); }
+        else { showInvalid($(this), 'Invalid GST number'); $('#gst_error').text('Invalid GST number'); }
+    });
 
-function checkPassword() {
+    $('#pan_no').on('keyup blur', function() {
+        var val = $(this).val().trim().toUpperCase(); $(this).val(val);
+        if(val === '') { clearValidation($(this)); $('#pan_error').text(''); return; }
+        if(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(val)) { showValid($(this)); $('#pan_error').text(''); }
+        else { showInvalid($(this), 'Invalid PAN'); $('#pan_error').text('Invalid PAN'); }
+    });
 
-    if (confirmPassword.value === "") {
-        message.innerHTML = "";
-        return;
+    $('#ifsc_code').on('keyup blur', function() {
+        var val = $(this).val().trim().toUpperCase(); $(this).val(val);
+        if(val === '') { clearValidation($(this)); $('#ifsc_error').text(''); return; }
+        if(/^[A-Z]{4}0[A-Z0-9]{6}$/.test(val)) { showValid($(this)); $('#ifsc_error').text(''); }
+        else { showInvalid($(this), 'Invalid IFSC'); $('#ifsc_error').text('Invalid IFSC'); }
+    });
+
+    $('#account_number').on('keyup blur', function() {
+        var val = $(this).val().trim();
+        if(val === '') { clearValidation($(this)); $('#account_error').text(''); return; }
+        if(/^\d+$/.test(val)) { showValid($(this)); $('#account_error').text(''); }
+        else { showInvalid($(this), 'Only digits allowed'); $('#account_error').text('Only digits allowed'); }
+    });
+
+    // AJAX duplicate check
+    function checkDuplicate(field, value, $input, $errorSpan) {
+        $.ajax({
+            url: 'check-supplier-duplicate.php',
+            type: 'GET',
+            data: { field: field, value: value, id: <?php echo $id; ?> },
+            dataType: 'json',
+            success: function(res) {
+                if(res.exists) {
+                    showInvalid($input, 'This ' + field.replace('_',' ') + ' already exists.');
+                    $errorSpan.text('Already in use');
+                } else {
+                    showValid($input);
+                    $errorSpan.text('');
+                }
+            }
+        });
     }
 
-    if (password.value === confirmPassword.value) {
+    // Form submit
+    $('#supplierForm').on('submit', function(e) {
+        e.preventDefault();
+        $('input, textarea').each(function(){ $(this).val($.trim($(this).val())); });
 
-        message.innerHTML = "✓ Password Matched";
-        message.style.color = "green";
-        confirmPassword.style.borderColor = "green";
+        var valid = true, firstInvalid = null;
 
-    } else {
+        if($('#supplier_name').val() === '') { showInvalid($('#supplier_name'), 'Supplier name is required.'); valid = false; firstInvalid = firstInvalid || $('#supplier_name')[0]; }
+        if(!/^[0-9]{10}$/.test($('#phone').val())) { showInvalid($('#phone'), 'Valid 10-digit mobile required'); valid = false; firstInvalid = firstInvalid || $('#phone')[0]; }
+        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($('#email').val())) { showInvalid($('#email'), 'Valid email required'); valid = false; firstInvalid = firstInvalid || $('#email')[0]; }
+        if(!/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test($('#gst_no').val().toUpperCase())) { showInvalid($('#gst_no'), 'Invalid GST'); valid = false; firstInvalid = firstInvalid || $('#gst_no')[0]; }
+        if(!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test($('#pan_no').val().toUpperCase())) { showInvalid($('#pan_no'), 'Invalid PAN'); valid = false; firstInvalid = firstInvalid || $('#pan_no')[0]; }
+        if(!/^[A-Z]{4}0[A-Z0-9]{6}$/.test($('#ifsc_code').val().toUpperCase())) { showInvalid($('#ifsc_code'), 'Invalid IFSC'); valid = false; firstInvalid = firstInvalid || $('#ifsc_code')[0]; }
 
-        message.innerHTML = "✗ Password Not Matched";
-        message.style.color = "red";
-        confirmPassword.style.borderColor = "red";
+        // Clean opening balance
+        $('#opening_balance').val($('#opening_balance').val().replace(/[₹,]/g, '').trim());
 
-    }
-}
+        if(!valid) {
+            if(firstInvalid) firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
+        }
 
-password.addEventListener("keyup", checkPassword);
-confirmPassword.addEventListener("keyup", checkPassword);
+        $('#updateBtn').prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Updating...');
+        this.submit();
+    });
 
-
-
-
-        </script>
-
+    // SweetAlert2 on success (after reload)
+    <?php if($update_success): ?>
+    Swal.fire({
+        icon: 'success',
+        title: 'Supplier Updated',
+        text: 'The supplier details have been saved successfully.',
+        confirmButtonColor: '#32bdea',
+        timer: 2500,
+        showConfirmButton: true
+    }).then(function() {
+        window.location = 'view-suppliers.php?id=<?php echo $id; ?>';
+    });
+    <?php endif; ?>
+});
+</script>
 </body>
 </html>

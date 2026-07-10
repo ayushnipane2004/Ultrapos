@@ -10,6 +10,13 @@
     <link rel="stylesheet" href="posdash/html/assets/vendor/@fortawesome/fontawesome-free/css/all.min.css"> 
     <link rel="stylesheet" href="posdash/html/assets/vendor/line-awesome/dist/line-awesome/css/line-awesome.min.css"> 
     <link rel="stylesheet" href="posdash/html/assets/vendor/remixicon/fonts/remixicon.css"> 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+
+
 </head> 
 <body class=" "> 
 
@@ -20,70 +27,224 @@ include 'posdash/html/backend/db.php';
 
 if(isset($_POST['login']))
 {
-    $email = mysqli_real_escape_string($conn,$_POST['email']);
-    $password = mysqli_real_escape_string($conn,$_POST['password']);
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $password = mysqli_real_escape_string($conn, $_POST['password']);
     $latitude = $_POST['latitude'];
     $longitude = $_POST['longitude'];
 
-    if($email=='superadmin@gmail.com' && $password=='super@123'){
-        header("Location:posdash/html/backend/super-dashboard.php");
-    }
-    else{
-        $sql = mysqli_query($conn,"
-        SELECT * FROM users
-        WHERE email='$email' 
-        ");
+    /* ================= SUPER ADMIN LOGIN ================= */
 
-        if(mysqli_num_rows($sql)>0)
+    if($email == "superadmin@gmail.com")
+    {
+        if($password == "super@123")
         {
-            $row=mysqli_fetch_assoc($sql);
+            $_SESSION['superadmin'] = true;
 
-            if(password_verify($password,$row['password']))
-            {
-                $_SESSION['user_id']=$row['id'];
-                $_SESSION['full_name']=$row['full_name'];
-                $_SESSION['user_name']=$row['username'];
-                $_SESSION['email']=$row['email'];
-                $_SESSION['company_id']=$row['company_id'];
-                $_SESSION['role_id']=$row['role_id'];
-                $_SESSION['branch_id']=$row['branch_id'];
-                $_SESSION['profile_photo']=$row['profile_photo'];
-
-                $user_id=$row['id'];
-                $full_name=$row['full_name'];
-                $user_name=$row['username'];
-                $ip_address=$_SERVER['REMOTE_ADDR'];
-                $user_agent=$_SERVER['HTTP_USER_AGENT'];
-                $login_status="Success";
-
-                mysqli_query($conn,"
-                INSERT INTO login
-                (user_id,user_name,ip_address,user_agent,login_status,latitude,longitude)
-                VALUES
-                ('$user_id','$user_name','$ip_address','$user_agent','$login_status','$latitude','$longitude')
-                ");
-
-                header("Location:posdash/html/backend/dashboard.php");
-                exit;
-            }
-            else
-            {
-                echo "<script>
-                alert('Invalid Password');
-                </script>";
-                header("Location:posdash/html/backend/pages-error.html");
-            }
+            header("Location: posdash/html/backend/super-dashboard.php");
+            exit;
         }
         else
         {
-            echo "<script>
-            alert('Email Not Found');
+            echo "
+            <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Password',
+                text: 'The password you entered is incorrect.',
+                confirmButtonColor: '#32bdea'
+            }).then(() => {
+                window.location='index.php';
+            });
             </script>";
-            header("Location:posdash/html/backend/pages-error.html");
+            exit;
         }
+    }
+
+
+    $sql = mysqli_query($conn,"
+        SELECT *
+        FROM users
+        WHERE email='$email'
+    ");
+
+    if(mysqli_num_rows($sql) > 0)
+    {
+        $row = mysqli_fetch_assoc($sql);
+
+        if(password_verify($password, $row['password']))
+        {
+            $_SESSION['user_id']       = $row['id'];
+            $_SESSION['full_name']     = $row['full_name'];
+            $_SESSION['user_name']     = $row['username'];
+            $_SESSION['email']         = $row['email'];
+            $_SESSION['company_id']    = $row['company_id'];
+            $_SESSION['role_id']       = $row['role_id'];
+            $_SESSION['branch_id']     = $row['branch_id'];
+            $_SESSION['profile_photo'] = $row['profile_photo'];
+
+            $user_id      = $row['id'];
+            $user_name    = $row['username'];
+            $ip_address   = $_SERVER['REMOTE_ADDR'];
+            $user_agent   = $_SERVER['HTTP_USER_AGENT'];
+            $login_status = "Success";
+
+
+$company_id = $row['company_id'];
+
+$company = mysqli_query($conn,"
+SELECT company_logo
+FROM company_master
+WHERE id='$company_id'
+");
+
+
+$companyRow = mysqli_fetch_assoc($company);
+
+$_SESSION['company_logo'] = $companyRow['company_logo'];
+
+
+
+
+
+            mysqli_query($conn,"
+                INSERT INTO login
+                (
+                    user_id,
+                    user_name,
+                    ip_address,
+                    user_agent,
+                    login_status,
+                    latitude,
+                    longitude
+                )
+                VALUES
+                (
+                    '$user_id',
+                    '$user_name',
+                    '$ip_address',
+                    '$user_agent',
+                    '$login_status',
+                    '$latitude',
+                    '$longitude'
+                )
+            ");
+
+echo "
+<script>
+Swal.fire({
+    icon: 'success',
+    title: '<span style=\"font-size:28px;color:#28a745;\">Welcome to UltraPOS</span>',
+    html: `
+        <div style='padding:10px;'>
+
+            <h3 style='margin-bottom:10px;color:#007bff;'>
+                👋 Welcome, ".$row['full_name']."
+            </h3>
+
+            <p style='font-size:16px;color:#555;margin-bottom:15px;'>
+                Login Successful!
+            </p>
+
+            <div style='
+                background:#f8f9fa;
+                border-radius:10px;
+                padding:12px;
+                border-left:5px solid #32bdea;
+                text-align:left;
+            '>
+
+                <p style='margin:0;'>
+                    <b>🕒 Login Time:</b><br>
+                    ".date('d M Y, h:i A')."
+                </p>
+
+            </div>
+
+            <br>
+
+            <p style='color:#28a745;font-size:15px;margin:0;'>
+                Have a productive day! 🚀
+            </p>
+
+        </div>
+    `,
+    confirmButtonText: 'Continue to Dashboard',
+    confirmButtonColor: '#32bdea',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    backdrop: 'rgba(0,0,0,0.55)',
+    showClass: {
+        popup: 'animate__animated animate__zoomIn'
+    },
+    hideClass: {
+        popup: 'animate__animated animate__zoomOut'
+    }
+}).then(() => {
+
+    window.location='posdash/html/backend/dashboard.php';
+
+});
+</script>";
+exit;
+
+        }
+        else
+        {
+            echo "
+            <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid Password',
+                text: 'The password you entered is incorrect.',
+                confirmButtonColor: '#32bdea'
+            }).then(() => {
+                window.location='index.php';
+            });
+            </script>";
+            exit;
+        }
+    }
+    else
+    {
+        if(empty($email) && empty($password))
+        {
+            $title = "Login Required";
+            $text  = "Please enter your email and password.";
+        }
+        elseif(empty($email))
+        {
+            $title = "Invalid Email";
+            $text  = "Please enter your email address.";
+        }
+        elseif(empty($password))
+        {
+            $title = "Invalid Password";
+            $text  = "Please enter your password.";
+        }
+        else
+        {
+            $title = "Invalid Email & Password";
+            $text  = "The email and password you entered are incorrect.";
+        }
+
+        echo "
+        <script>
+        Swal.fire({
+            icon: 'error',
+            title: '$title',
+            text: '$text',
+            confirmButtonColor: '#32bdea'
+        }).then(() => {
+            window.location='index.php';
+        });
+        </script>";
+        exit;
     }
 }
 ?>
+
+
+
 
 <div class="wrapper"> 
     <section class="login-content"> 
@@ -101,19 +262,45 @@ if(isset($_POST['login']))
                                         <p>Login to stay connected.</p> 
 
                                         <form method="post"> 
+
+
                                             <div class="row"> 
+
+
                                                 <div class="col-lg-12"> 
                                                     <div class="floating-label form-group"> 
+
                                                         <input class="floating-input form-control" type="text" placeholder=" " name="email"> 
                                                         <label>Email</label> 
                                                     </div> 
                                                 </div> 
-                                                <div class="col-lg-12"> 
-                                                    <div class="floating-label form-group"> 
-                                                        <input class="floating-input form-control" type="password" placeholder=" " name="password"> 
-                                                        <label>Password</label> 
-                                                    </div> 
-                                                </div> 
+
+
+
+   <div class="col-lg-12">
+    <div class="floating-label form-group position-relative">
+
+        <input
+            class="floating-input form-control pr-5"
+            type="password"
+            id="password"
+            name="password"
+            placeholder=" ">
+
+        <label>Password</label>
+
+        <span id="togglePassword"
+              style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer; z-index:1000;">
+            <i class="fas fa-eye"></i>
+        </span>
+
+    </div>
+</div>
+
+
+
+
+
                                                 <div class="col-lg-6"> 
                                                     
                                                 </div> 
@@ -147,6 +334,11 @@ if(isset($_POST['login']))
 
 
 
+
+
+
+
+
                             </div> 
                         </div> 
                     </div> 
@@ -162,6 +354,49 @@ if(isset($_POST['login']))
 <script src="posdash/html/assets/js/customizer.js"></script> 
 <script src="posdash/html/assets/js/chart-custom.js"></script> 
 <script src="posdash/html/assets/js/app.js"></script> 
+
+<script>
+if(localStorage.getItem("logout_success"))
+{
+    localStorage.removeItem("logout_success");
+
+    Swal.fire({
+        icon: "success",
+        title: "Signed Out!",
+        text: "You have been signed out successfully.",
+        timer: 1900,
+        showConfirmButton: false
+    });
+}
+</script>
+
+
+
+<script>
+const togglePassword = document.getElementById("togglePassword");
+const password = document.getElementById("password");
+
+togglePassword.addEventListener("click", function () {
+
+    const type = password.getAttribute("type") === "password" ? "text" : "password";
+
+    password.setAttribute("type", type);
+
+    const icon = this.querySelector("i");
+
+    if(type === "text"){
+        icon.classList.remove("fa-eye");
+        icon.classList.add("fa-eye-slash");
+    }else{
+        icon.classList.remove("fa-eye-slash");
+        icon.classList.add("fa-eye");
+    }
+
+});
+</script>
+
+
+
 <script> 
     if (navigator.geolocation) { 
         navigator.geolocation.getCurrentPosition(function(position) { 
